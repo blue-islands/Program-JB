@@ -36,31 +36,33 @@ public class LearnProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        NodeList childList = node.getChildNodes();
+    public String eval(final Node node, final ParseState ps) {
+        final NodeList childList = node.getChildNodes();
         String pattern = "";
         String that = "*";
         String template = "";
         for (int i = 0; i < childList.getLength(); i++) {
             if (childList.item(i).getNodeName().equals("category")) {
-                NodeList grandChildList = childList.item(i).getChildNodes();
+                final NodeList grandChildList = childList.item(i).getChildNodes();
                 for (int j = 0; j < grandChildList.getLength(); j++) {
                     if (grandChildList.item(j).getNodeName().equals("pattern")) {
-                        pattern = recursLearn(grandChildList.item(j), ps);
+                        pattern = this.recursLearn(grandChildList.item(j), ps);
                     } else if (grandChildList.item(j).getNodeName().equals("that")) {
-                        that = recursLearn(grandChildList.item(j), ps);
+                        that = this.recursLearn(grandChildList.item(j), ps);
                     } else if (grandChildList.item(j).getNodeName().equals("template")) {
-                        template = recursLearn(grandChildList.item(j), ps);
+                        template = this.recursLearn(grandChildList.item(j), ps);
                     }
                 }
                 pattern = pattern.substring("<pattern>".length(), pattern.length() - "</pattern>".length());
                 if (log.isTraceEnabled()) {
                     log.trace("Learn Pattern = {}", pattern);
                 }
-                if (template.length() >= "<template></template>".length())
+                if (template.length() >= "<template></template>".length()) {
                     template = template.substring("<template>".length(), template.length() - "</template>".length());
-                if (that.length() >= "<that></that>".length())
+                }
+                if (that.length() >= "<that></that>".length()) {
                     that = that.substring("<that>".length(), that.length() - "</that>".length());
+                }
                 pattern = pattern.toUpperCase();
                 pattern = pattern.replaceAll("\n", " ");
                 pattern = pattern.replaceAll("[ ]+", " ");
@@ -72,7 +74,7 @@ public class LearnProcessor extends BaseTagProcessor {
                     log.trace("Learn That = {}", that);
                     log.trace("Learn Template = {}", template);
                 }
-                Bot bot = ps.getChatSession().getBot();
+                final Bot bot = ps.getChatSession().getBot();
                 Category c;
                 if (node.getNodeName().equals("learn")) {
                     c = new Category(bot, 0, pattern, that, "*", template, Constants.nullAimlFile);
@@ -87,27 +89,27 @@ public class LearnProcessor extends BaseTagProcessor {
         return "";
     }
 
-    private String unevaluatedAIML(Node node, ParseState ps) {
-        String result = learnEvalTagContent(node, ps);
+    private String unevaluatedAIML(final Node node, final ParseState ps) {
+        final String result = this.learnEvalTagContent(node, ps);
         return AIMLProcessor.unevaluatedXML(result, node, ps);
     }
 
-    private String recursLearn(Node node, ParseState ps) {
-        String nodeName = node.getNodeName();
+    private String recursLearn(final Node node, final ParseState ps) {
+        final String nodeName = node.getNodeName();
         if ("#text".equals(nodeName)) {
             return node.getNodeValue();
         } else if ("eval".equals(nodeName)) {
-            return evalTagContent(node, ps, null);                // AIML 2.0
+            return this.evalTagContent(node, ps, null);                // AIML 2.0
         }
-        return unevaluatedAIML(node, ps);
+        return this.unevaluatedAIML(node, ps);
     }
 
-    private String learnEvalTagContent(Node node, ParseState ps) {
-        NodeList childList = node.getChildNodes();
-        StringBuilder result = new StringBuilder();
+    private String learnEvalTagContent(final Node node, final ParseState ps) {
+        final NodeList childList = node.getChildNodes();
+        final StringBuilder result = new StringBuilder();
         for (int i = 0; i < childList.getLength(); i++) {
-            Node child = childList.item(i);
-            result.append(recursLearn(child, ps));
+            final Node child = childList.item(i);
+            result.append(this.recursLearn(child, ps));
         }
         return result.toString();
     }

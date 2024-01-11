@@ -31,8 +31,8 @@ public class ThatStarProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        int index = getIndexValue(node, ps);
+    public String eval(final Node node, final ParseState ps) {
+        final int index = this.getIndexValue(node, ps);
         if (ps.getStarBindings().getThatStars().star(index) == null) {
             return "";
         }

@@ -30,7 +30,7 @@ public class TemplateProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        return evalTagContent(node, ps, null);
+    public String eval(final Node node, final ParseState ps) {
+        return this.evalTagContent(node, ps, null);
     }
 }

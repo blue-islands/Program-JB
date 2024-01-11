@@ -31,10 +31,10 @@ public class DateProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        String jformat = getAttributeOrTagValue(node, ps, "jformat");      // AIML 2.0
-        String locale = getAttributeOrTagValue(node, ps, "locale");
-        String timezone = getAttributeOrTagValue(node, ps, "timezone");
+    public String eval(final Node node, final ParseState ps) {
+        final String jformat = this.getAttributeOrTagValue(node, ps, "jformat");      // AIML 2.0
+        final String locale = this.getAttributeOrTagValue(node, ps, "locale");
+        final String timezone = this.getAttributeOrTagValue(node, ps, "timezone");
         return CalendarUtils.date(jformat, locale, timezone);
     }
 }

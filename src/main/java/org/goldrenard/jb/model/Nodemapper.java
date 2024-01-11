@@ -16,11 +16,11 @@
  */
 package org.goldrenard.jb.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.List;
 import java.util.Map;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Nodemapper data structure.  In order to minimize memory overhead this class has no methods.
@@ -39,7 +39,7 @@ public class Nodemapper {
     private boolean shortCut = false;
     private List<String> sets;
 
-    public Nodemapper(int height) {
+    public Nodemapper(final int height) {
         this.height = height;
     }
 }

@@ -32,11 +32,11 @@ public class IntervalProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        String style = getAttributeOrTagValue(node, ps, "style");      // AIML 2.0
-        String jformat = getAttributeOrTagValue(node, ps, "jformat");      // AIML 2.0
-        String from = getAttributeOrTagValue(node, ps, "from");
-        String to = getAttributeOrTagValue(node, ps, "to");
+    public String eval(final Node node, final ParseState ps) {
+        String style = this.getAttributeOrTagValue(node, ps, "style");      // AIML 2.0
+        String jformat = this.getAttributeOrTagValue(node, ps, "jformat");      // AIML 2.0
+        String from = this.getAttributeOrTagValue(node, ps, "from");
+        String to = this.getAttributeOrTagValue(node, ps, "to");
         if (style == null) {
             style = "years";
         }

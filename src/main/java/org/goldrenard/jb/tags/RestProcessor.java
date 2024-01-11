@@ -28,13 +28,13 @@ public class RestProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        String content = evalTagContent(node, ps, null);
+    public String eval(final Node node, final ParseState ps) {
+        String content = this.evalTagContent(node, ps, null);
         content = ps.getChatSession().getBot().getPreProcessor().normalize(content);
         return restWords(content);
     }
 
-    private static String restWords(String sentence) {
+    private static String restWords(final String sentence) {
         String content = (sentence == null ? "" : sentence);
         content = content.trim();
         if (content.contains(" ")) {

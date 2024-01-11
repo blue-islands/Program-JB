@@ -23,28 +23,28 @@ public class Timer {
     private long startTimeMillis;
 
     public Timer() {
-        start();
+        this.start();
     }
 
     public void start() {
-        startTimeMillis = System.currentTimeMillis();
+        this.startTimeMillis = System.currentTimeMillis();
     }
 
     public long elapsedTimeMillis() {
-        return System.currentTimeMillis() - startTimeMillis + 1;
+        return System.currentTimeMillis() - this.startTimeMillis + 1;
     }
 
     public long elapsedRestartMs() {
-        long ms = System.currentTimeMillis() - startTimeMillis + 1;
-        start();
+        final long ms = System.currentTimeMillis() - this.startTimeMillis + 1;
+        this.start();
         return ms;
     }
 
     public float elapsedTimeSecs() {
-        return elapsedTimeMillis() / 1000F;
+        return this.elapsedTimeMillis() / 1000F;
     }
 
     public float elapsedTimeMins() {
-        return elapsedTimeSecs() / 60F;
+        return this.elapsedTimeSecs() / 60F;
     }
 }

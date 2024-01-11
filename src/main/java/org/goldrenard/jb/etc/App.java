@@ -25,20 +25,20 @@ public class App {
 
     private static final Logger log = LoggerFactory.getLogger(App.class);
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
 
-        BotConfiguration.BotConfigurationBuilder builder = BotConfiguration
+        final BotConfiguration.BotConfigurationBuilder builder = BotConfiguration
                 .builder()
                 .name("alice2")
                 .action("chat")
                 .jpTokenize(false)
                 .graphShortCuts(true);
 
-        for (String s : args) {
-            String[] splitArg = s.split("=");
+        for (final String s : args) {
+            final String[] splitArg = s.split("=");
             if (splitArg.length >= 2) {
-                String option = splitArg[0];
-                String value = splitArg[1];
+                final String option = splitArg[0];
+                final String value = splitArg[1];
                 if (option.equals("bot")) {
                     builder.name(value);
                 }
@@ -53,9 +53,9 @@ public class App {
                 }
             }
         }
-        BotConfiguration configuration = builder.build();
+        final BotConfiguration configuration = builder.build();
         log.info(configuration.getProgramName());
-        Bot bot = new Bot(configuration);
+        final Bot bot = new Bot(configuration);
 
         if (bot.getBrain().getCategories().size() < AB.brain_print_size) {
             bot.getBrain().printGraph();
@@ -65,7 +65,7 @@ public class App {
         switch (configuration.getAction()) {
             case "chat":
             case "chat-app":
-                boolean doWrites = !configuration.getAction().equals("chat-app");
+                final boolean doWrites = !configuration.getAction().equals("chat-app");
                 TestAB.testChat(bot, doWrites);
                 break;
             case "ab":
@@ -78,7 +78,7 @@ public class App {
                 bot.writeAIMLFiles();
                 break;
             case "abwq":
-                AB ab = new AB(bot, TestAB.sample_file);
+                final AB ab = new AB(bot, TestAB.sample_file);
                 ab.abwq();
                 break;
             case "test":

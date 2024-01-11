@@ -16,6 +16,13 @@
  */
 package org.goldrenard.jb.etc;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.goldrenard.jb.configuration.BotConfiguration;
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.core.Bot;
@@ -28,13 +35,6 @@ import org.goldrenard.jb.utils.IOUtils;
 import org.goldrenard.jb.utils.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Experimental class that analyzes log data and suggests
@@ -67,17 +67,17 @@ public class AB {
 
     private static final Logger log = LoggerFactory.getLogger(AB.class);
 
-    private boolean shuffleMode = true;
+    private final boolean shuffleMode = true;
 
-    private boolean sortMode = !shuffleMode;
+    private boolean sortMode = !this.shuffleMode;
 
-    private boolean filterAtomicMode = false;
+    private final boolean filterAtomicMode = false;
 
-    private boolean filterWildMode = false;
+    private final boolean filterWildMode = false;
 
-    private boolean offerAliceResponses = true;
+    private final boolean offerAliceResponses = true;
 
-    private String logfile; //normal.txt";
+    private final String logfile; //normal.txt";
 
     private int runCompletedCnt;
 
@@ -85,9 +85,9 @@ public class AB {
 
     public Bot alice;
 
-    private AIMLSet passed;
+    private final AIMLSet passed;
 
-    private AIMLSet testSet;
+    private final AIMLSet testSet;
 
     private final Graphmaster inputGraph;
 
@@ -102,20 +102,20 @@ public class AB {
     private static int leafPatternCnt = 0;
     private static int starPatternCnt = 0;
 
-    public AB(Bot bot, String sampleFile) {
-        logfile = bot.getRootPath() + "/data/" + sampleFile;
-        log.info("AB with sample file {}", logfile);
+    public AB(final Bot bot, final String sampleFile) {
+        this.logfile = bot.getRootPath() + "/data/" + sampleFile;
+        log.info("AB with sample file {}", this.logfile);
         this.bot = bot;
         this.inputGraph = new Graphmaster(bot, "input");
         this.deletedGraph = new Graphmaster(bot, "deleted");
         this.patternGraph = new Graphmaster(bot, "pattern");
-        for (Category c : bot.getBrain().getCategories()) {
-            patternGraph.addCategory(c);
+        for (final Category c : bot.getBrain().getCategories()) {
+            this.patternGraph.addCategory(c);
         }
-        this.suggestedCategories = new ArrayList<Category>();
-        passed = new AIMLSet("passed", bot);
-        testSet = new AIMLSet("1000", bot);
-        readDeletedIFCategories();
+        this.suggestedCategories = new ArrayList<>();
+        this.passed = new AIMLSet("passed", bot);
+        this.testSet = new AIMLSet("1000", bot);
+        this.readDeletedIFCategories();
     }
 
     /**
@@ -126,22 +126,22 @@ public class AB {
      * @param timer           tells elapsed time in ms
      * @see AB
      */
-    private void productivity(int runCompletedCnt, Timer timer) {
-        float time = timer.elapsedTimeMins();
-        log.info("Completed {} in {} min. Productivity {} cat/min", runCompletedCnt, time, (float) runCompletedCnt / time);
+    private void productivity(final int runCompletedCnt, final Timer timer) {
+        final float time = timer.elapsedTimeMins();
+        log.info("Completed {} in {} min. Productivity {} cat/min", runCompletedCnt, time, runCompletedCnt / time);
     }
 
     private void readDeletedIFCategories() {
-        bot.readCertainIFCategories(deletedGraph, deleted_aiml_file);
+        this.bot.readCertainIFCategories(this.deletedGraph, deleted_aiml_file);
         if (log.isTraceEnabled()) {
-            log.trace("--- DELETED CATEGORIES -- read {} deleted categories", deletedGraph.getCategories().size());
+            log.trace("--- DELETED CATEGORIES -- read {} deleted categories", this.deletedGraph.getCategories().size());
         }
     }
 
     private void writeDeletedIFCategories() {
         log.info("--- DELETED CATEGORIES -- write");
-        bot.writeCertainIFCategories(deletedGraph, deleted_aiml_file);
-        log.info("--- DELETED CATEGORIES -- write {} deleted categories", deletedGraph.getCategories().size());
+        this.bot.writeCertainIFCategories(this.deletedGraph, deleted_aiml_file);
+        log.info("--- DELETED CATEGORIES -- write {} deleted categories", this.deletedGraph.getCategories().size());
     }
 
     /**
@@ -151,16 +151,16 @@ public class AB {
      * @param template the category's template
      * @param filename the filename for the category.
      */
-    private void saveCategory(String pattern, String template, String filename) {
-        String that = "*";
-        String topic = "*";
-        Category c = new Category(bot, 0, pattern, that, topic, template, filename);
+    private void saveCategory(final String pattern, final String template, final String filename) {
+        final String that = "*";
+        final String topic = "*";
+        final Category c = new Category(this.bot, 0, pattern, that, topic, template, filename);
 
         if (c.validate()) {
-            bot.getBrain().addCategory(c);
+            this.bot.getBrain().addCategory(c);
             // bot.categories.add(c);
-            bot.writeAIMLIFFiles();
-            runCompletedCnt++;
+            this.bot.writeAIMLIFFiles();
+            this.runCompletedCnt++;
         } else {
             log.warn("Invalid Category {}", c.getValidationMessage());
         }
@@ -171,11 +171,11 @@ public class AB {
      *
      * @param c the category
      */
-    private void deleteCategory(Category c) {
+    private void deleteCategory(final Category c) {
         c.setFilename(deleted_aiml_file);
         c.setTemplate(deleted_template);
-        deletedGraph.addCategory(c);
-        writeDeletedIFCategories();
+        this.deletedGraph.addCategory(c);
+        this.writeDeletedIFCategories();
     }
 
     /**
@@ -183,18 +183,18 @@ public class AB {
      *
      * @param c the category
      */
-    private void skipCategory(Category c) {
+    private void skipCategory(final Category c) {
        /* bot.unfinishedGraph.addCategory(c);
         log.warn("{} unfinished categories", bot.unfinishedGraph.getCategories().size());
         bot.writeUnfinishedIFCategories();*/
     }
 
     public void abwq() {
-        Timer timer = new Timer();
+        final Timer timer = new Timer();
         timer.start();
-        classifyInputs(logfile);
+        this.classifyInputs(this.logfile);
         log.info("{} classifying inputs", timer.elapsedTimeSecs());
-        bot.writeQuit();
+        this.bot.writeQuit();
     }
 
     /**
@@ -203,7 +203,7 @@ public class AB {
      *
      * @param filename file containing sample inputs
      */
-    private void graphInputs(String filename) {
+    private void graphInputs(final String filename) {
         int count = 0;
         try (FileInputStream stream = new FileInputStream(filename)) {
             // Open the file that is the first
@@ -214,16 +214,18 @@ public class AB {
                 //Read File Line By Line
                 while ((strLine = reader.readLine()) != null && count < limit) {
                     //strLine = preProcessor.normalize(strLine);
-                    Category c = new Category(bot, 0, strLine, "*", "*", "nothing", Constants.unknownAimlFile);
-                    Nodemapper node = inputGraph.findNode(c);
+                    final Category c = new Category(this.bot, 0, strLine, "*", "*", "nothing", Constants.unknownAimlFile);
+                    final Nodemapper node = this.inputGraph.findNode(c);
                     if (node == null) {
-                        inputGraph.addCategory(c);
+                        this.inputGraph.addCategory(c);
                         c.incrementActivationCnt();
-                    } else node.getCategory().incrementActivationCnt();
+                    } else {
+                        node.getCategory().incrementActivationCnt();
+                    }
                     count++;
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error", e);
         }
     }
@@ -232,7 +234,7 @@ public class AB {
      * find suggested patterns in a graph of inputs
      */
     private void findPatterns() {
-        findPatterns(inputGraph.getRoot(), "");
+        this.findPatterns(this.inputGraph.getRoot(), "");
         log.info("{} Leaf Patterns, {} Star Patterns", leafPatternCnt, starPatternCnt);
     }
 
@@ -242,7 +244,7 @@ public class AB {
      * @param node                    current graph node
      * @param partialPatternThatTopic partial pattern path
      */
-    private void findPatterns(Nodemapper node, String partialPatternThatTopic) {
+    private void findPatterns(final Nodemapper node, final String partialPatternThatTopic) {
         if (NodemapperOperator.isLeaf(node)) {
             if (log.isTraceEnabled()) {
                 log.trace("LEAF: {}. {}", node.getCategory().getActivationCnt(), partialPatternThatTopic);
@@ -259,12 +261,12 @@ public class AB {
                     } else {
                         categoryPatternThatTopic = partialPatternThatTopic;
                     }
-                    Category c = new Category(bot, 0, categoryPatternThatTopic, Constants.blank_template, Constants.unknownAimlFile);
-                    if (!bot.getBrain().existsCategory(c) && !deletedGraph.existsCategory(c)) {
-                        patternGraph.addCategory(c);
-                        suggestedCategories.add(c);
+                    final Category c = new Category(this.bot, 0, categoryPatternThatTopic, Constants.blank_template, Constants.unknownAimlFile);
+                    if (!this.bot.getBrain().existsCategory(c) && !this.deletedGraph.existsCategory(c)) {
+                        this.patternGraph.addCategory(c);
+                        this.suggestedCategories.add(c);
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     log.error("Error", e);
                 }
             }
@@ -275,18 +277,18 @@ public class AB {
             }
             starPatternCnt++;
             try {
-                Category c = new Category(bot, 0, partialPatternThatTopic + " * <THAT> * <TOPIC> *", Constants.blank_template, Constants.unknownAimlFile);
-                if (!bot.getBrain().existsCategory(c) && !deletedGraph.existsCategory(c)/* && !unfinishedGraph.existsCategory(c)*/) {
-                    patternGraph.addCategory(c);
-                    suggestedCategories.add(c);
+                final Category c = new Category(this.bot, 0, partialPatternThatTopic + " * <THAT> * <TOPIC> *", Constants.blank_template, Constants.unknownAimlFile);
+                if (!this.bot.getBrain().existsCategory(c) && !this.deletedGraph.existsCategory(c)/* && !unfinishedGraph.existsCategory(c)*/) {
+                    this.patternGraph.addCategory(c);
+                    this.suggestedCategories.add(c);
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.error("Error", e);
             }
         }
-        for (String key : NodemapperOperator.keySet(node)) {
-            Nodemapper value = NodemapperOperator.get(node, key);
-            findPatterns(value, partialPatternThatTopic + " " + key);
+        for (final String key : NodemapperOperator.keySet(node)) {
+            final Nodemapper value = NodemapperOperator.get(node, key);
+            this.findPatterns(value, partialPatternThatTopic + " " + key);
         }
     }
 
@@ -296,7 +298,7 @@ public class AB {
      * @param filename file containing sample normalized inputs
      */
 
-    private void classifyInputs(String filename) {
+    private void classifyInputs(final String filename) {
         try (FileInputStream fstream = new FileInputStream(filename)) {
             // Get the object
             try (BufferedReader br = new BufferedReader(new InputStreamReader(fstream))) {
@@ -310,10 +312,10 @@ public class AB {
                     if (strLine.startsWith("Human: ")) {
                         strLine = strLine.substring("Human: ".length(), strLine.length());
                     }
-                    String sentences[] = bot.getPreProcessor().sentenceSplit(strLine);
-                    for (String sentence : sentences) {
+                    final String sentences[] = this.bot.getPreProcessor().sentenceSplit(strLine);
+                    for (final String sentence : sentences) {
                         if (sentence.length() > 0) {
-                            Nodemapper match = patternGraph.match(sentence, "unknown", "unknown");
+                            final Nodemapper match = this.patternGraph.match(sentence, "unknown", "unknown");
 
                             if (match == null) {
                                 log.info("{} null match", sentence);
@@ -333,7 +335,7 @@ public class AB {
 
                 log.info("Finished classifying {} inputs", count);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
     }
@@ -346,45 +348,45 @@ public class AB {
      * Classifies input log into those new patterns.
      */
     public void ab() {
-        String logFile = logfile;
+        final String logFile = this.logfile;
 
-        if (offerAliceResponses) {
-            alice = new Bot(BotConfiguration.builder().name("alice").enableExternalSets(false).build());
+        if (this.offerAliceResponses) {
+            this.alice = new Bot(BotConfiguration.builder().name("alice").enableExternalSets(false).build());
         }
-        Timer timer = new Timer();
-        bot.getBrain().nodeStats();
-        if (bot.getBrain().getCategories().size() < brain_print_size) {
-            bot.getBrain().printGraph();
+        final Timer timer = new Timer();
+        this.bot.getBrain().nodeStats();
+        if (this.bot.getBrain().getCategories().size() < brain_print_size) {
+            this.bot.getBrain().printGraph();
         }
         timer.start();
 
         log.info("Graphing inputs");
-        graphInputs(logFile);
+        this.graphInputs(logFile);
 
         log.info("{} seconds Graphing inputs", timer.elapsedTimeSecs());
-        inputGraph.nodeStats();
-        if (inputGraph.getCategories().size() < brain_print_size) {
-            inputGraph.printGraph();
+        this.inputGraph.nodeStats();
+        if (this.inputGraph.getCategories().size() < brain_print_size) {
+            this.inputGraph.printGraph();
         }
 
         timer.start();
         log.info("Finding Patterns");
-        findPatterns();
-        log.info("{} suggested categories, {} seconds finding patterns", suggestedCategories.size(), timer.elapsedTimeSecs());
+        this.findPatterns();
+        log.info("{} suggested categories, {} seconds finding patterns", this.suggestedCategories.size(), timer.elapsedTimeSecs());
 
         timer.start();
-        patternGraph.nodeStats();
-        if (patternGraph.getCategories().size() < brain_print_size) {
-            patternGraph.printGraph();
+        this.patternGraph.nodeStats();
+        if (this.patternGraph.getCategories().size() < brain_print_size) {
+            this.patternGraph.printGraph();
         }
         log.info("Classifying Inputs from {}", logFile);
-        classifyInputs(logFile);
+        this.classifyInputs(logFile);
         log.info("{} classifying inputs", timer.elapsedTimeSecs());
     }
 
-    private ArrayList<Category> nonZeroActivationCount(ArrayList<Category> suggestedCategories) {
-        ArrayList<Category> result = new ArrayList<>();
-        for (Category c : suggestedCategories) {
+    private ArrayList<Category> nonZeroActivationCount(final ArrayList<Category> suggestedCategories) {
+        final ArrayList<Category> result = new ArrayList<>();
+        for (final Category c : suggestedCategories) {
             if (c.getActivationCnt() > 0) {
                 result.add(c);
             } else if (log.isDebugEnabled()) {
@@ -398,25 +400,25 @@ public class AB {
      * train the bot through a terminal interaction
      */
     public void terminalInteraction() {
-        sortMode = !shuffleMode;
-        if (sortMode) {
-            suggestedCategories.sort(Category.ACTIVATION_COMPARATOR);
+        this.sortMode = !this.shuffleMode;
+        if (this.sortMode) {
+            this.suggestedCategories.sort(Category.ACTIVATION_COMPARATOR);
         }
-        ArrayList<Category> topSuggestCategories = new ArrayList<>();
-        for (int i = 0; i < 10000 && i < suggestedCategories.size(); i++) {
-            topSuggestCategories.add(suggestedCategories.get(i));
+        final ArrayList<Category> topSuggestCategories = new ArrayList<>();
+        for (int i = 0; i < 10000 && i < this.suggestedCategories.size(); i++) {
+            topSuggestCategories.add(this.suggestedCategories.get(i));
         }
-        suggestedCategories = topSuggestCategories;
-        if (shuffleMode) {
-            Collections.shuffle(suggestedCategories);
+        this.suggestedCategories = topSuggestCategories;
+        if (this.shuffleMode) {
+            Collections.shuffle(this.suggestedCategories);
         }
 
-        Timer timer = new Timer();
+        final Timer timer = new Timer();
         timer.start();
-        runCompletedCnt = 0;
-        ArrayList<Category> filteredAtomicCategories = new ArrayList<>();
-        ArrayList<Category> filteredWildCategories = new ArrayList<>();
-        for (Category c : suggestedCategories) {
+        this.runCompletedCnt = 0;
+        final ArrayList<Category> filteredAtomicCategories = new ArrayList<>();
+        final ArrayList<Category> filteredWildCategories = new ArrayList<>();
+        for (final Category c : this.suggestedCategories) {
             if (!c.getPattern().contains("*")) {
                 filteredAtomicCategories.add(c);
             } else {
@@ -425,33 +427,33 @@ public class AB {
         }
 
         ArrayList<Category> browserCategories;
-        if (filterAtomicMode) {
+        if (this.filterAtomicMode) {
             browserCategories = filteredAtomicCategories;
-        } else if (filterWildMode) {
+        } else if (this.filterWildMode) {
             browserCategories = filteredWildCategories;
         } else {
-            browserCategories = suggestedCategories;
+            browserCategories = this.suggestedCategories;
         }
         if (log.isDebugEnabled()) {
             log.debug("{} filtered suggested categories", filteredAtomicCategories.size());
         }
-        browserCategories = nonZeroActivationCount(browserCategories);
+        browserCategories = this.nonZeroActivationCount(browserCategories);
 
         boolean firstInteraction = true;
         String aliceTemplate = null;
-        for (Category c : browserCategories) {
+        for (final Category c : browserCategories) {
             try {
-                List<String> samples = new ArrayList<>(c.getMatches(bot));
+                final List<String> samples = new ArrayList<>(c.getMatches(this.bot));
                 Collections.shuffle(samples);
-                int sampleSize = Math.min(displayed_input_sample_size, c.getMatches(bot).size());
+                final int sampleSize = Math.min(displayed_input_sample_size, c.getMatches(this.bot).size());
                 for (int i = 0; i < sampleSize; i++) {
                     log.info("{}", samples.get(i));
                 }
 
                 log.info("[{}] {}", c.getActivationCnt(), c.inputThatTopic());
                 Nodemapper node;
-                if (offerAliceResponses) {
-                    node = alice.getBrain().findNode(c);
+                if (this.offerAliceResponses) {
+                    node = this.alice.getBrain().findNode(c);
                     if (node != null) {
                         aliceTemplate = node.getCategory().getTemplate();
                         String displayAliceTemplate = aliceTemplate;
@@ -469,15 +471,15 @@ public class AB {
                     timer.start();
                     firstInteraction = false;
                 }
-                productivity(runCompletedCnt, timer);
-                terminalInteractionStep(bot, "", IOUtils.readInputTextLine(), c, aliceTemplate);
-            } catch (Exception e) {
+                this.productivity(this.runCompletedCnt, timer);
+                this.terminalInteractionStep(this.bot, "", IOUtils.readInputTextLine(), c, aliceTemplate);
+            } catch (final Exception e) {
                 log.info("Returning to Category Browser", e);
             }
         }
         log.info("No more samples");
-        bot.writeAIMLFiles();
-        bot.writeAIMLIFFiles();
+        this.bot.writeAIMLFiles();
+        this.bot.writeAIMLIFFiles();
     }
 
     /**
@@ -488,22 +490,22 @@ public class AB {
      * @param textLine response typed by the botmaster
      * @param c        AIML category selected
      */
-    private void terminalInteractionStep(Bot bot, String request, String textLine, Category c, String alicetemplate) {
+    private void terminalInteractionStep(final Bot bot, final String request, String textLine, final Category c, final String alicetemplate) {
         String template;
         if (textLine.contains("<pattern>") && textLine.contains("</pattern>")) {
-            int index = textLine.indexOf("<pattern>") + "<pattern>".length();
-            int jndex = textLine.indexOf("</pattern>");
-            int kndex = jndex + "</pattern>".length();
+            final int index = textLine.indexOf("<pattern>") + "<pattern>".length();
+            final int jndex = textLine.indexOf("</pattern>");
+            final int kndex = jndex + "</pattern>".length();
             if (index < jndex) {
-                String pattern = textLine.substring(index, jndex);
+                final String pattern = textLine.substring(index, jndex);
                 c.setPattern(pattern);
                 textLine = textLine.substring(kndex, textLine.length());
                 log.info("Got pattern = {} template = {}", pattern, textLine);
             }
         }
         String botThinks = "";
-        String[] pronouns = {"he", "she", "it", "we", "they"};
-        for (String p : pronouns) {
+        final String[] pronouns = {"he", "she", "it", "we", "they"};
+        for (final String p : pronouns) {
             if (textLine.contains("<" + p + ">")) {
                 textLine = textLine.replace("<" + p + ">", "");
                 botThinks = "<think><set name=\"" + p + "\"><set name=\"topic\"><star/></set></set></think>";
@@ -515,58 +517,61 @@ public class AB {
             bot.writeQuit();
             System.exit(0);
         } else if (textLine.equals("skip") || textLine.equals("")) { // skip this one for now
-            skipCategory(c);
+            this.skipCategory(c);
         } else if (textLine.equals("s") || textLine.equals("pass")) { //
-            passed.add(request);
-            AIMLSet difference = new AIMLSet("difference", bot);
-            difference.addAll(testSet);
-            difference.removeAll(passed);
+            this.passed.add(request);
+            final AIMLSet difference = new AIMLSet("difference", bot);
+            difference.addAll(this.testSet);
+            difference.removeAll(this.passed);
             bot.getSets().write(difference);
-            bot.getSets().write(passed);
+            bot.getSets().write(this.passed);
         } else if (textLine.equals("a")) {
             template = alicetemplate;
             String filename;
-            if (template.contains("<sr")) filename = reductions_update_aiml_file;
-            else filename = personality_aiml_file;
-            saveCategory(c.getPattern(), template, filename);
+            if (template.contains("<sr")) {
+                filename = reductions_update_aiml_file;
+            } else {
+                filename = personality_aiml_file;
+            }
+            this.saveCategory(c.getPattern(), template, filename);
         } else if (textLine.equals("d")) { // delete this suggested category
-            deleteCategory(c);
+            this.deleteCategory(c);
         } else if (textLine.equals("x")) {    // ask another bot
             template = "<sraix services=\"pannous\">" + c.getPattern().replace("*", "<star/>") + "</sraix>";
             template += botThinks;
-            saveCategory(c.getPattern(), template, sraix_aiml_file);
+            this.saveCategory(c.getPattern(), template, sraix_aiml_file);
         } else if (textLine.equals("p")) {   // filter inappropriate content
             template = "<srai>" + inappropriate_filter + "</srai>";
             template += botThinks;
-            saveCategory(c.getPattern(), template, inappropriate_aiml_file);
+            this.saveCategory(c.getPattern(), template, inappropriate_aiml_file);
         } else if (textLine.equals("f")) { // filter profanity
             template = "<srai>" + profanity_filter + "</srai>";
             template += botThinks;
-            saveCategory(c.getPattern(), template, profanity_aiml_file);
+            this.saveCategory(c.getPattern(), template, profanity_aiml_file);
         } else if (textLine.equals("i")) {
             template = "<srai>" + insult_filter + "</srai>";
             template += botThinks;
-            saveCategory(c.getPattern(), template, insult_aiml_file);
+            this.saveCategory(c.getPattern(), template, insult_aiml_file);
         } else if (textLine.contains("<srai>") || textLine.contains("<sr/>")) {
             template = textLine;
             template += botThinks;
-            saveCategory(c.getPattern(), template, reductions_update_aiml_file);
+            this.saveCategory(c.getPattern(), template, reductions_update_aiml_file);
         } else if (textLine.contains("<oob>")) {
             template = textLine;
             template += botThinks;
-            saveCategory(c.getPattern(), template, oob_aiml_file);
+            this.saveCategory(c.getPattern(), template, oob_aiml_file);
         } else if (textLine.contains("<set name") || botThinks.length() > 0) {
             template = textLine;
             template += botThinks;
-            saveCategory(c.getPattern(), template, predicates_aiml_file);
+            this.saveCategory(c.getPattern(), template, predicates_aiml_file);
         } else if (textLine.contains("<get name") && !textLine.contains("<get name=\"name")) {
             template = textLine;
             template += botThinks;
-            saveCategory(c.getPattern(), template, predicates_aiml_file);
+            this.saveCategory(c.getPattern(), template, predicates_aiml_file);
         } else {
             template = textLine;
             template += botThinks;
-            saveCategory(c.getPattern(), template, personality_aiml_file);
+            this.saveCategory(c.getPattern(), template, personality_aiml_file);
         }
     }
 }

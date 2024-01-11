@@ -16,11 +16,16 @@
  */
 package org.goldrenard.jb.configuration;
 
-import lombok.*;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.goldrenard.jb.tags.base.AIMLTagProcessor;
 
-import java.util.List;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.Singular;
 
 @Getter
 @Setter
@@ -102,11 +107,11 @@ public class BotConfiguration {
     private List<AIMLTagProcessor> tagProcessors;
 
     public String getName() {
-        return StringUtils.isNotBlank(name) ? name : DEFAULT_NAME;
+        return StringUtils.isNotBlank(this.name) ? this.name : DEFAULT_NAME;
     }
 
     public String getAction() {
-        return StringUtils.isNotBlank(action) ? action : DEFAULT_ACTION;
+        return StringUtils.isNotBlank(this.action) ? this.action : DEFAULT_ACTION;
     }
 
     public String getPath() {

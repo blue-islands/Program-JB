@@ -32,12 +32,12 @@ public class BotProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
+    public String eval(final Node node, final ParseState ps) {
         String result = Constants.default_property;
-        String propertyName = getAttributeOrTagValue(node, ps, "name");
+        final String propertyName = this.getAttributeOrTagValue(node, ps, "name");
         if (propertyName != null) {
             if (ps.getRequest() != null && ps.getRequest().getAttributes() != null) {
-                Object attribute = ps.getRequest().getAttributes().get(propertyName);
+                final Object attribute = ps.getRequest().getAttributes().get(propertyName);
                 if (attribute != null) {
                     result = String.valueOf(attribute);
                 }

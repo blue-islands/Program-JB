@@ -16,59 +16,68 @@
  */
 package org.goldrenard.jb.parser.base;
 
+import java.io.File;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import org.apache.commons.io.FilenameUtils;
 import org.goldrenard.jb.model.NamedEntity;
 import org.goldrenard.jb.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.*;
-
 public abstract class NamedResource<T extends NamedEntity> extends HashMap<String, T> implements ParsedResource<T>, Map<String, T> {
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
     private static final Logger log = LoggerFactory.getLogger(NamedResource.class);
 
     private final String resourceExtension;
 
-    protected NamedResource(String resourceExtension) {
+    protected NamedResource(final String resourceExtension) {
         Objects.requireNonNull(resourceExtension, "Resource extension is required");
         this.resourceExtension = resourceExtension;
     }
 
     @Override
-    public int read(String path) {
+    public int read(final String path) {
         int count = 0;
         try {
-            File folder = new File(path);
+            final File folder = new File(path);
             if (folder.exists()) {
                 if (log.isTraceEnabled()) {
                     log.trace("Loading resources files from {}", path);
                 }
-                for (File file : IOUtils.listFiles(folder)) {
+                for (final File file : IOUtils.listFiles(folder)) {
                     if (file.isFile() && file.exists()) {
-                        String fileName = file.getName();
-                        String extension = FilenameUtils.getExtension(fileName);
-                        if (resourceExtension.equalsIgnoreCase(extension)) {
-                            String resourceName = FilenameUtils.getBaseName(fileName);
+                        final String fileName = file.getName();
+                        final String extension = FilenameUtils.getExtension(fileName);
+                        if (this.resourceExtension.equalsIgnoreCase(extension)) {
+                            final String resourceName = FilenameUtils.getBaseName(fileName);
                             if (log.isTraceEnabled()) {
                                 log.trace("Read AIML resource {} from {}", resourceName, fileName);
                             }
-                            T entry = load(resourceName, file);
+                            final T entry = this.load(resourceName, file);
                             if (entry instanceof Set) {
                                 count += ((Set) entry).size();
                             }
                             if (entry instanceof Map) {
                                 count += ((Map) entry).size();
                             }
-                            put(entry.getName(), entry);
+                            this.put(entry.getName(), entry);
                         }
                     }
                 }
             } else {
                 log.warn("{} does not exist.", path);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
         return count;
@@ -76,11 +85,12 @@ public abstract class NamedResource<T extends NamedEntity> extends HashMap<Strin
 
     protected abstract T load(String resourceName, File file);
 
-    public void write(Collection<T> resources) {
-        for (T resource : resources) {
+    @Override
+    public void write(final Collection<T> resources) {
+        for (final T resource : resources) {
             try {
-                write(resource);
-            } catch (Exception e) {
+                this.write(resource);
+            } catch (final Exception e) {
                 log.error("Could not write resource {}", resource);
             }
         }

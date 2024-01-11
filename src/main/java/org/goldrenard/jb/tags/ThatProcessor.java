@@ -37,22 +37,22 @@ public class ThatProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
+    public String eval(final Node node, final ParseState ps) {
         int index = 0;
         int jndex = 0;
-        String value = getAttributeOrTagValue(node, ps, "index");
+        final String value = this.getAttributeOrTagValue(node, ps, "index");
         if (value != null) {
             try {
-                String[] spair = value.split(",");
+                final String[] spair = value.split(",");
                 index = Integer.parseInt(spair[0]) - 1;
                 jndex = Integer.parseInt(spair[1]) - 1;
                 log.debug("That index={},{}", index, jndex);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.error("Error: ", e);
             }
         }
         String that = Constants.unknown_history_item;
-        History hist = ps.getChatSession().getThatHistory().get(index);
+        final History hist = ps.getChatSession().getThatHistory().get(index);
         if (hist != null) {
             that = (String) hist.get(jndex);
         }

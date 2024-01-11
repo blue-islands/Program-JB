@@ -30,8 +30,8 @@ public class RequestProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        int index = getIndexValue(node, ps);
+    public String eval(final Node node, final ParseState ps) {
+        final int index = this.getIndexValue(node, ps);
         return ps.getChatSession().getRequestHistory().getString(index).trim();
     }
 }

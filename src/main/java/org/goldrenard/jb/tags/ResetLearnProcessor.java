@@ -31,7 +31,7 @@ public class ResetLearnProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
+    public String eval(final Node node, final ParseState ps) {
         try {
             switch (node.getNodeName()) {
                 case "resetlearnf":
@@ -41,18 +41,18 @@ public class ResetLearnProcessor extends BaseTagProcessor {
                 default:
                     throw new IllegalStateException("Unsupported tag");
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
             return "";
         }
     }
 
-    private static String resetlearnf(ParseState ps) {
+    private static String resetlearnf(final ParseState ps) {
         ps.getChatSession().getBot().deleteLearnfCategories();
         return "Deleted Learnf Categories";
     }
 
-    private static String resetlearn(ParseState ps) {
+    private static String resetlearn(final ParseState ps) {
         ps.getChatSession().getBot().deleteLearnCategories();
         return "Deleted Learn Categories";
     }

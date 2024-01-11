@@ -16,16 +16,22 @@
  */
 package org.goldrenard.jb.core;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.model.Clause;
 import org.goldrenard.jb.model.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -44,7 +50,7 @@ public class TripleStore {
 
     private Map<String, Tuple> tupleMap = new ConcurrentHashMap<>();
 
-    public TripleStore(String name, Bot bot) {
+    public TripleStore(final String name, final Bot bot) {
         this.name = name;
         this.bot = bot;
     }
@@ -58,109 +64,109 @@ public class TripleStore {
         private String object;
 
         public Triple(String s, String p, String o) {
-            Bot bot = TripleStore.this.bot;
+            final Bot bot = TripleStore.this.bot;
             if (bot != null) {
                 s = bot.getPreProcessor().normalize(s);
                 p = bot.getPreProcessor().normalize(p);
                 o = bot.getPreProcessor().normalize(o);
             }
             if (s != null && p != null && o != null) {
-                subject = s;
-                predicate = p;
-                object = o;
-                id = name + idCnt++;
+                this.subject = s;
+                this.predicate = p;
+                this.object = o;
+                this.id = TripleStore.this.name + TripleStore.this.idCnt++;
             }
         }
     }
 
-    public String mapTriple(Triple triple) {
-        String id = triple.id;
-        idTriple.put(id, triple);
-        String subject = triple.subject.toUpperCase();
-        String predicate = triple.predicate.toUpperCase();
-        String object = triple.object.toUpperCase();
+    public String mapTriple(final Triple triple) {
+        final String id = triple.id;
+        this.idTriple.put(id, triple);
+        final String subject = triple.subject.toUpperCase();
+        final String predicate = triple.predicate.toUpperCase();
+        final String object = triple.object.toUpperCase();
 
         String tripleString = subject + ":" + predicate + ":" + object;
         tripleString = tripleString.toUpperCase();
 
-        if (tripleStringId.keySet().contains(tripleString)) {
-            return tripleStringId.get(tripleString); // triple already exists
+        if (this.tripleStringId.keySet().contains(tripleString)) {
+            return this.tripleStringId.get(tripleString); // triple already exists
         } else {
-            tripleStringId.put(tripleString, id);
+            this.tripleStringId.put(tripleString, id);
 
-            Set<String> existingTriples = subjectTriples.getOrDefault(subject, new HashSet<>());
+            Set<String> existingTriples = this.subjectTriples.getOrDefault(subject, new HashSet<>());
             existingTriples.add(id);
-            subjectTriples.put(subject, existingTriples);
+            this.subjectTriples.put(subject, existingTriples);
 
-            existingTriples = predicateTriples.getOrDefault(predicate, new HashSet<>());
+            existingTriples = this.predicateTriples.getOrDefault(predicate, new HashSet<>());
             existingTriples.add(id);
-            predicateTriples.put(predicate, existingTriples);
+            this.predicateTriples.put(predicate, existingTriples);
 
-            existingTriples = objectTriples.getOrDefault(object, new HashSet<>());
+            existingTriples = this.objectTriples.getOrDefault(object, new HashSet<>());
             existingTriples.add(id);
-            objectTriples.put(object, existingTriples);
+            this.objectTriples.put(object, existingTriples);
             return id;
         }
     }
 
     public String unMapTriple(Triple triple) {
-        String subject = triple.subject.toUpperCase();
-        String predicate = triple.predicate.toUpperCase();
-        String object = triple.object.toUpperCase();
+        final String subject = triple.subject.toUpperCase();
+        final String predicate = triple.predicate.toUpperCase();
+        final String object = triple.object.toUpperCase();
 
         String tripleString = subject + ":" + predicate + ":" + object;
 
         log.debug("unMapTriple {}", tripleString);
         tripleString = tripleString.toUpperCase();
-        triple = idTriple.get(tripleStringId.get(tripleString));
+        triple = this.idTriple.get(this.tripleStringId.get(tripleString));
         log.debug("unMapTriple {}", triple);
         if (triple != null) {
-            String id = triple.id;
-            idTriple.remove(id);
-            tripleStringId.remove(tripleString);
+            final String id = triple.id;
+            this.idTriple.remove(id);
+            this.tripleStringId.remove(tripleString);
 
-            Set<String> existingTriples = subjectTriples.getOrDefault(subject, new HashSet<>());
+            Set<String> existingTriples = this.subjectTriples.getOrDefault(subject, new HashSet<>());
             existingTriples.remove(id);
-            subjectTriples.put(subject, existingTriples);
+            this.subjectTriples.put(subject, existingTriples);
 
-            existingTriples = predicateTriples.getOrDefault(predicate, new HashSet<>());
+            existingTriples = this.predicateTriples.getOrDefault(predicate, new HashSet<>());
             existingTriples.remove(id);
-            predicateTriples.put(predicate, existingTriples);
+            this.predicateTriples.put(predicate, existingTriples);
 
-            existingTriples = objectTriples.getOrDefault(object, new HashSet<>());
+            existingTriples = this.objectTriples.getOrDefault(object, new HashSet<>());
             existingTriples.remove(id);
-            objectTriples.put(object, existingTriples);
+            this.objectTriples.put(object, existingTriples);
             return id;
         }
         return Constants.undefined_triple;
     }
 
     public Set<String> allTriples() {
-        return new HashSet<>(idTriple.keySet());
+        return new HashSet<>(this.idTriple.keySet());
     }
 
-    public String addTriple(String subject, String predicate, String object) {
+    public String addTriple(final String subject, final String predicate, final String object) {
         if (subject == null || predicate == null || object == null) {
             return Constants.undefined_triple;
         }
-        Triple triple = new Triple(subject, predicate, object);
-        return mapTriple(triple);
+        final Triple triple = new Triple(subject, predicate, object);
+        return this.mapTriple(triple);
     }
 
-    public String deleteTriple(String subject, String predicate, String object) {
+    public String deleteTriple(final String subject, final String predicate, final String object) {
         if (subject == null || predicate == null || object == null) {
             return Constants.undefined_triple;
         }
         if (log.isTraceEnabled()) {
             log.trace("Deleting {}:{}:{}", subject, predicate, object);
         }
-        Triple triple = new Triple(subject, predicate, object);
-        return unMapTriple(triple);
+        final Triple triple = new Triple(subject, predicate, object);
+        return this.unMapTriple(triple);
     }
 
     public void printTriples() {
-        for (String x : idTriple.keySet()) {
-            Triple triple = idTriple.get(x);
+        for (final String x : this.idTriple.keySet()) {
+            final Triple triple = this.idTriple.get(x);
             log.info("{}:{}:{}:{}", x, triple.subject, triple.predicate, triple.object);
         }
     }
@@ -169,30 +175,30 @@ public class TripleStore {
         return new HashSet<>();
     }
 
-    public Set<String> getTriples(String s, String p, String o) {
+    public Set<String> getTriples(final String s, final String p, final String o) {
         Set<String> subjectSet;
         Set<String> predicateSet;
         Set<String> objectSet;
         Set<String> resultSet;
         if (log.isTraceEnabled()) {
-            log.trace("TripleStore: getTriples [{}] {}:{}:{}", idTriple.size(), s, p, o);
+            log.trace("TripleStore: getTriples [{}] {}:{}:{}", this.idTriple.size(), s, p, o);
         }
         if (s == null || s.startsWith("?")) {
-            subjectSet = allTriples();
+            subjectSet = this.allTriples();
         } else {
-            subjectSet = subjectTriples.getOrDefault(s.toUpperCase(), emptySet());
+            subjectSet = this.subjectTriples.getOrDefault(s.toUpperCase(), this.emptySet());
         }
 
         if (p == null || p.startsWith("?")) {
-            predicateSet = allTriples();
+            predicateSet = this.allTriples();
         } else {
-            predicateSet = predicateTriples.getOrDefault(p.toUpperCase(), emptySet());
+            predicateSet = this.predicateTriples.getOrDefault(p.toUpperCase(), this.emptySet());
         }
 
         if (o == null || o.startsWith("?")) {
-            objectSet = allTriples();
+            objectSet = this.allTriples();
         } else {
-            objectSet = objectTriples.getOrDefault(o.toUpperCase(), emptySet());
+            objectSet = this.objectTriples.getOrDefault(o.toUpperCase(), this.emptySet());
         }
 
         resultSet = new HashSet<>(subjectSet);
@@ -201,96 +207,96 @@ public class TripleStore {
         return resultSet;
     }
 
-    public Set<String> getSubjects(Set<String> triples) {
-        HashSet<String> resultSet = new HashSet<>();
-        for (String id : triples) {
-            Triple triple = idTriple.get(id);
+    public Set<String> getSubjects(final Set<String> triples) {
+        final HashSet<String> resultSet = new HashSet<>();
+        for (final String id : triples) {
+            final Triple triple = this.idTriple.get(id);
             resultSet.add(triple.subject);
         }
         return resultSet;
     }
 
-    public Set<String> getPredicates(Set<String> triples) {
-        HashSet<String> resultSet = new HashSet<>();
-        for (String id : triples) {
-            Triple triple = idTriple.get(id);
+    public Set<String> getPredicates(final Set<String> triples) {
+        final HashSet<String> resultSet = new HashSet<>();
+        for (final String id : triples) {
+            final Triple triple = this.idTriple.get(id);
             resultSet.add(triple.predicate);
         }
         return resultSet;
     }
 
-    public Set<String> getObjects(Set<String> triples) {
-        Set<String> resultSet = new HashSet<>();
-        for (String id : triples) {
-            Triple triple = idTriple.get(id);
+    public Set<String> getObjects(final Set<String> triples) {
+        final Set<String> resultSet = new HashSet<>();
+        for (final String id : triples) {
+            final Triple triple = this.idTriple.get(id);
             resultSet.add(triple.object);
         }
         return resultSet;
     }
 
-    public String getSubject(String id) {
-        if (idTriple.containsKey(id)) {
-            return idTriple.get(id).subject;
+    public String getSubject(final String id) {
+        if (this.idTriple.containsKey(id)) {
+            return this.idTriple.get(id).subject;
         }
         return "Unknown subject";
     }
 
-    public String getPredicate(String id) {
-        if (idTriple.containsKey(id)) {
-            return idTriple.get(id).predicate;
+    public String getPredicate(final String id) {
+        if (this.idTriple.containsKey(id)) {
+            return this.idTriple.get(id).predicate;
         }
         return "Unknown predicate";
     }
 
-    public String getObject(String id) {
-        if (idTriple.containsKey(id)) {
-            return idTriple.get(id).object;
+    public String getObject(final String id) {
+        if (this.idTriple.containsKey(id)) {
+            return this.idTriple.get(id).object;
         }
         return "Unknown object";
     }
 
-    public String stringTriple(String id) {
-        Triple triple = idTriple.get(id);
+    public String stringTriple(final String id) {
+        final Triple triple = this.idTriple.get(id);
         return id + " " + triple.subject + " " + triple.predicate + " " + triple.object;
     }
 
     public void printAllTriples() {
-        for (String id : idTriple.keySet()) {
-            log.info("{}", stringTriple(id));
+        for (final String id : this.idTriple.keySet()) {
+            log.info("{}", this.stringTriple(id));
         }
     }
 
-    public Set<Tuple> select(Set<String> vars, Set<String> visibleVars, List<Clause> clauses) {
+    public Set<Tuple> select(final Set<String> vars, final Set<String> visibleVars, final List<Clause> clauses) {
         Set<Tuple> result = new HashSet<>();
         try {
-            Tuple tuple = storeTuple(new Tuple(vars, visibleVars));
-            result = selectFromRemainingClauses(tuple, clauses);
-        } catch (Exception e) {
+            final Tuple tuple = this.storeTuple(new Tuple(vars, visibleVars));
+            result = this.selectFromRemainingClauses(tuple, clauses);
+        } catch (final Exception e) {
             log.error("Error", e);
         }
         return result;
     }
 
-    public Clause adjustClause(Tuple tuple, Clause clause) {
-        Set vars = tuple.getVars();
-        String subj = clause.getSubj();
-        String pred = clause.getPred();
-        String obj = clause.getObj();
-        Clause newClause = new Clause(clause);
+    public Clause adjustClause(final Tuple tuple, final Clause clause) {
+        final Set vars = tuple.getVars();
+        final String subj = clause.getSubj();
+        final String pred = clause.getPred();
+        final String obj = clause.getObj();
+        final Clause newClause = new Clause(clause);
         if (vars.contains(subj)) {
-            String value = tuple.getValue(subj);
+            final String value = tuple.getValue(subj);
             if (!value.equals(Constants.unbound_variable)) {
                 newClause.setSubj(value);
             }
         }
         if (vars.contains(pred)) {
-            String value = tuple.getValue(pred);
+            final String value = tuple.getValue(pred);
             if (!value.equals(Constants.unbound_variable)) {
                 newClause.setPred(value);
             }
         }
         if (vars.contains(obj)) {
-            String value = tuple.getValue(obj);
+            final String value = tuple.getValue(obj);
             if (!value.equals(Constants.unbound_variable)) {
                 newClause.setObj(value);
             }
@@ -299,20 +305,26 @@ public class TripleStore {
 
     }
 
-    public Tuple bindTuple(Tuple partial, String triple, Clause clause) {
-        Tuple tuple = storeTuple(new Tuple(partial));
-        if (clause.getSubj().startsWith("?")) tuple.bind(clause.getSubj(), getSubject(triple));
-        if (clause.getPred().startsWith("?")) tuple.bind(clause.getPred(), getPredicate(triple));
-        if (clause.getObj().startsWith("?")) tuple.bind(clause.getObj(), getObject(triple));
+    public Tuple bindTuple(final Tuple partial, final String triple, final Clause clause) {
+        final Tuple tuple = this.storeTuple(new Tuple(partial));
+        if (clause.getSubj().startsWith("?")) {
+            tuple.bind(clause.getSubj(), this.getSubject(triple));
+        }
+        if (clause.getPred().startsWith("?")) {
+            tuple.bind(clause.getPred(), this.getPredicate(triple));
+        }
+        if (clause.getObj().startsWith("?")) {
+            tuple.bind(clause.getObj(), this.getObject(triple));
+        }
         return tuple;
     }
 
-    public Set<Tuple> selectFromSingleClause(Tuple partial, Clause clause, Boolean affirm) {
-        Set<Tuple> result = new HashSet<>();
-        Set<String> triples = getTriples(clause.getSubj(), clause.getPred(), clause.getObj());
+    public Set<Tuple> selectFromSingleClause(final Tuple partial, final Clause clause, final Boolean affirm) {
+        final Set<Tuple> result = new HashSet<>();
+        final Set<String> triples = this.getTriples(clause.getSubj(), clause.getPred(), clause.getObj());
         if (affirm) {
-            for (String triple : triples) {
-                Tuple tuple = bindTuple(partial, triple, clause);
+            for (final String triple : triples) {
+                final Tuple tuple = this.bindTuple(partial, triple, clause);
                 result.add(tuple);
             }
         } else if (triples.size() == 0) {
@@ -321,28 +333,30 @@ public class TripleStore {
         return result;
     }
 
-    public Set<Tuple> selectFromRemainingClauses(Tuple partial, List<Clause> clauses) {
+    public Set<Tuple> selectFromRemainingClauses(final Tuple partial, final List<Clause> clauses) {
         Set<Tuple> result = new HashSet<>();
         Clause clause = clauses.get(0);
-        clause = adjustClause(partial, clause);
-        Set<Tuple> tuples = selectFromSingleClause(partial, clause, clause.getAffirm());
+        clause = this.adjustClause(partial, clause);
+        final Set<Tuple> tuples = this.selectFromSingleClause(partial, clause, clause.getAffirm());
         if (clauses.size() > 1) {
-            List<Clause> remainingClauses = new ArrayList<>(clauses);
+            final List<Clause> remainingClauses = new ArrayList<>(clauses);
             remainingClauses.remove(0);
-            for (Tuple tuple : tuples) {
-                result.addAll(selectFromRemainingClauses(tuple, remainingClauses));
+            for (final Tuple tuple : tuples) {
+                result.addAll(this.selectFromRemainingClauses(tuple, remainingClauses));
             }
-        } else result = tuples;
+        } else {
+            result = tuples;
+        }
         return result;
     }
 
-    public Tuple storeTuple(Tuple tuple) {
-        tupleMap.put(tuple.getName(), tuple);
+    public Tuple storeTuple(final Tuple tuple) {
+        this.tupleMap.put(tuple.getName(), tuple);
         return tuple;
     }
 
-    public String tupleGet(String tupleName, String varName) {
-        Tuple tuple = tupleMap.get(tupleName);
+    public String tupleGet(final String tupleName, final String varName) {
+        final Tuple tuple = this.tupleMap.get(tupleName);
         return tuple == null ? Constants.default_get : tuple.getValue(varName);
     }
 }

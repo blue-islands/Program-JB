@@ -16,8 +16,9 @@
  */
 package org.goldrenard.jb.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.core.AIMLProcessor;
 import org.goldrenard.jb.core.Bot;
@@ -26,8 +27,8 @@ import org.goldrenard.jb.utils.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicLong;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * structure representing an AIML category and operations on Category
@@ -56,9 +57,9 @@ public class Category {
      *
      * @return and AIML Set of elements matching this category
      */
-    public AIMLSet getMatches(Bot bot) {
-        if (matches != null) {
-            return matches;
+    public AIMLSet getMatches(final Bot bot) {
+        if (this.matches != null) {
+            return this.matches;
         }
         return new AIMLSet("No Matches", bot);
     }
@@ -69,7 +70,7 @@ public class Category {
      * @return pattern
      */
     public String getPattern() {
-        return pattern == null ? "*" : pattern;
+        return this.pattern == null ? "*" : this.pattern;
     }
 
     /**
@@ -78,7 +79,7 @@ public class Category {
      * @return that pattern
      */
     public String getThat() {
-        return that == null ? "*" : that;
+        return this.that == null ? "*" : this.that;
     }
 
     /**
@@ -87,7 +88,7 @@ public class Category {
      * @return topic pattern
      */
     public String getTopic() {
-        return topic == null ? "*" : topic;
+        return this.topic == null ? "*" : this.topic;
     }
 
     /**
@@ -96,7 +97,7 @@ public class Category {
      * @return template
      */
     public String getTemplate() {
-        return template == null ? "" : template;
+        return this.template == null ? "" : this.template;
     }
 
     /**
@@ -105,21 +106,21 @@ public class Category {
      * @return file name
      */
     public String getFilename() {
-        return filename == null ? Constants.unknownAimlFile : filename;
+        return this.filename == null ? Constants.unknownAimlFile : this.filename;
     }
 
     /**
      * increment the category activation count
      */
     public void incrementActivationCnt() {
-        activationCnt++;
+        this.activationCnt++;
     }
 
     /**
      * return a string represeting the full pattern path as "{@code input pattern <THAT> that pattern <TOPIC> topic pattern}"
      */
     public String inputThatTopic() {
-        return Graphmaster.inputThatTopic(pattern, that, topic);
+        return Graphmaster.inputThatTopic(this.pattern, this.that, this.topic);
     }
 
     /**
@@ -127,17 +128,17 @@ public class Category {
      *
      * @param input matching input
      */
-    public void addMatch(String input, Bot bot) {
-        if (matches == null) {
-            String setName = this.inputThatTopic()
+    public void addMatch(final String input, final Bot bot) {
+        if (this.matches == null) {
+            final String setName = this.inputThatTopic()
                     .replace("*", "STAR")
                     .replace("_", "UNDERSCORE")
                     .replace(" ", "-")
                     .replace("<THAT>", "THAT")
                     .replace("<TOPIC>", "TOPIC");
-            matches = new AIMLSet(setName, bot);
+            this.matches = new AIMLSet(setName, bot);
         }
-        matches.add(input);
+        this.matches.add(input);
     }
 
     /**
@@ -146,11 +147,11 @@ public class Category {
      * @return template on a single line of text
      */
     public String getTemplateLine() {
-        String result = template;
+        String result = this.template;
         result = result.replaceAll("(\r\n|\n\r|\r|\n)", "\\#Newline");
         result = result.replaceAll(
-                bot.getConfiguration().getAimlifSplitChar(),
-                bot.getConfiguration().getAimlifSplitCharName());
+                this.bot.getConfiguration().getAimlifSplitChar(),
+                this.bot.getConfiguration().getAimlifSplitCharName());
         return result;
     }
 
@@ -160,7 +161,7 @@ public class Category {
      * @param line template on a single line of text
      * @return original multi-line template
      */
-    private static String lineToTemplate(Bot bot, String line) {
+    private static String lineToTemplate(final Bot bot, final String line) {
         String result = line.replaceAll("\\#Newline", "\n");
         result = result.replaceAll(
                 bot.getConfiguration().getAimlifSplitCharName(),
@@ -174,8 +175,8 @@ public class Category {
      * @param IF Category in AIMLIF format
      * @return Category object
      */
-    public static Category IFToCategory(Bot bot, String IF) {
-        String[] split = IF.split(bot.getConfiguration().getAimlifSplitChar());
+    public static Category IFToCategory(final Bot bot, final String IF) {
+        final String[] split = IF.split(bot.getConfiguration().getAimlifSplitChar());
         return new Category(bot, Integer.parseInt(split[0]), split[1], split[2], split[3], lineToTemplate(bot, split[4]), split[5]);
     }
 
@@ -185,8 +186,8 @@ public class Category {
      * @param category Category object
      * @return category in AIML format
      */
-    public static String categoryToIF(Category category) {
-        String c = category.bot.getConfiguration().getAimlifSplitChar();
+    public static String categoryToIF(final Category category) {
+        final String c = category.bot.getConfiguration().getAimlifSplitChar();
         return category.getActivationCnt() + c + category.getPattern() + c + category.getThat() + c +
                 category.getTopic() + c + category.getTemplateLine() + c + category.getFilename();
     }
@@ -197,15 +198,15 @@ public class Category {
      * @param category Category object
      * @return AIML Category
      */
-    public static String categoryToAIML(Category category) {
+    public static String categoryToAIML(final Category category) {
         String topicStart = "";
         String topicEnd = "";
         String thatStatement = "";
         String result = "";
         String pattern = category.getPattern();
         if (pattern.contains("<SET>") || pattern.contains("<BOT")) {
-            String[] splitPattern = pattern.split(" ");
-            StringBuilder rpattern = new StringBuilder();
+            final String[] splitPattern = pattern.split(" ");
+            final StringBuilder rpattern = new StringBuilder();
             for (String w : splitPattern) {
                 if (w.startsWith("<SET>") || w.startsWith("<BOT") || w.startsWith("NAME=")) {
                     w = w.toLowerCase();
@@ -215,7 +216,7 @@ public class Category {
             pattern = rpattern.toString().trim();
         }
 
-        String NL = "\n";
+        final String NL = "\n";
         try {
             if (!category.getTopic().equals("*")) {
                 topicStart = "<topic name=\"" + category.getTopic() + "\">" + NL;
@@ -227,7 +228,7 @@ public class Category {
             result = topicStart + "<category><pattern>" + pattern + "</pattern>" + thatStatement + NL +
                     "<template>" + category.getTemplate() + "</template>" + NL +
                     "</category>" + topicEnd;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
         return result;
@@ -239,9 +240,9 @@ public class Category {
      * @param pattern pattern expression
      * @return true or false
      */
-    public boolean validPatternForm(String pattern) {
+    public boolean validPatternForm(final String pattern) {
         if (pattern.length() < 1) {
-            validationMessage += "Zero length. ";
+            this.validationMessage += "Zero length. ";
             return false;
         }
         /*String[] words = pattern.split(" ");
@@ -261,25 +262,25 @@ public class Category {
      * @return true or false
      */
     public boolean validate() {
-        validationMessage = "";
-        if (!validPatternForm(pattern)) {
-            validationMessage += "Badly formatted <pattern>";
+        this.validationMessage = "";
+        if (!this.validPatternForm(this.pattern)) {
+            this.validationMessage += "Badly formatted <pattern>";
             return false;
         }
-        if (!validPatternForm(that)) {
-            validationMessage += "Badly formatted <that>";
+        if (!this.validPatternForm(this.that)) {
+            this.validationMessage += "Badly formatted <that>";
             return false;
         }
-        if (!validPatternForm(topic)) {
-            validationMessage += "Badly formatted <topic>";
+        if (!this.validPatternForm(this.topic)) {
+            this.validationMessage += "Badly formatted <topic>";
             return false;
         }
-        if (!AIMLProcessor.validTemplate(template)) {
-            validationMessage += "Badly formatted <template>";
+        if (!AIMLProcessor.validTemplate(this.template)) {
+            this.validationMessage += "Badly formatted <template>";
             return false;
         }
-        if (!filename.endsWith(".aiml")) {
-            validationMessage += "Filename suffix should be .aiml";
+        if (!this.filename.endsWith(".aiml")) {
+            this.validationMessage += "Filename suffix should be .aiml";
             return false;
         }
         return true;
@@ -296,7 +297,7 @@ public class Category {
      * @param filename      AIML file name
      */
 
-    public Category(Bot bot, int activationCnt, String pattern, String that, String topic, String template, String filename) {
+    public Category(final Bot bot, final int activationCnt, String pattern, String that, String topic, String template, String filename) {
         this.bot = bot;
         if (bot != null && bot.getConfiguration().isFixExcelCsv()) {
             pattern = Utilities.fixCSV(pattern);
@@ -311,7 +312,7 @@ public class Category {
         this.template = template.replace("& ", " and "); // XML parser treats & badly
         this.filename = filename;
         this.activationCnt = activationCnt;
-        matches = null;
+        this.matches = null;
         this.categoryNumber = categoryCnt.incrementAndGet();
     }
 
@@ -323,7 +324,7 @@ public class Category {
      * @param template         AIML template
      * @param filename         AIML category
      */
-    public Category(Bot bot, int activationCnt, String patternThatTopic, String template, String filename) {
+    public Category(final Bot bot, final int activationCnt, final String patternThatTopic, final String template, final String filename) {
         this(bot, activationCnt,
                 patternThatTopic.substring(0, patternThatTopic.indexOf("<THAT>")),
                 patternThatTopic.substring(patternThatTopic.indexOf("<THAT>") + "<THAT>".length(), patternThatTopic.indexOf("<TOPIC>")),

@@ -16,13 +16,17 @@
  */
 package org.goldrenard.jb.core;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+
 import org.goldrenard.jb.model.Substitution;
 import org.goldrenard.jb.parser.SubstitutionResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.util.regex.Matcher;
 
 /**
  * AIML Preprocessor and substitutions
@@ -48,22 +52,22 @@ public class PreProcessor {
      *
      * @param bot AIML bot
      */
-    public PreProcessor(Bot bot) {
+    public PreProcessor(final Bot bot) {
         this.bot = bot;
-        normal = new SubstitutionResource(bot);
-        denormal = new SubstitutionResource(bot);
-        person = new SubstitutionResource(bot);
-        person2 = new SubstitutionResource(bot);
-        gender = new SubstitutionResource(bot);
+        this.normal = new SubstitutionResource(bot);
+        this.denormal = new SubstitutionResource(bot);
+        this.person = new SubstitutionResource(bot);
+        this.person2 = new SubstitutionResource(bot);
+        this.gender = new SubstitutionResource(bot);
 
-        normal.read(bot.getConfigPath() + "/normal.txt");
-        denormal.read(bot.getConfigPath() + "/denormal.txt");
-        person.read(bot.getConfigPath() + "/person.txt");
-        person2.read(bot.getConfigPath() + "/person2.txt");
-        gender.read(bot.getConfigPath() + "/gender.txt");
+        this.normal.read(bot.getConfigPath() + "/normal.txt");
+        this.denormal.read(bot.getConfigPath() + "/denormal.txt");
+        this.person.read(bot.getConfigPath() + "/person.txt");
+        this.person2.read(bot.getConfigPath() + "/person2.txt");
+        this.gender.read(bot.getConfigPath() + "/gender.txt");
         if (log.isTraceEnabled()) {
             log.trace("PreProcessor: {} norms, {} denorms, {} persons, {} person2, {} genders ",
-                    normal.size(), denormal.size(), person.size(), person2.size(), gender.size());
+                    this.normal.size(), this.denormal.size(), this.person.size(), this.person2.size(), this.gender.size());
         }
     }
 
@@ -73,11 +77,11 @@ public class PreProcessor {
      * @param request input request
      * @return result of applying substitutions to input
      */
-    private String substitute(SubstitutionResource resource, String request) {
+    private String substitute(final SubstitutionResource resource, final String request) {
         String result = " " + request + " ";
         try {
-            for (Substitution substitution : resource) {
-                Matcher matcher = substitution.getPattern().matcher(result);
+            for (final Substitution substitution : resource) {
+                final Matcher matcher = substitution.getPattern().matcher(result);
                 if (matcher.find()) {
                     result = matcher.replaceAll(substitution.getSubstitution());
                 }
@@ -86,7 +90,7 @@ public class PreProcessor {
                 result = result.replace("  ", " ");
             }
             result = result.trim();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Request {} Result {}", request, result, e);
         }
         return result.trim();
@@ -98,11 +102,11 @@ public class PreProcessor {
      * @param request client input
      * @return normalized client input
      */
-    public String normalize(String request) {
+    public String normalize(final String request) {
         if (log.isDebugEnabled()) {
             log.debug("PreProcessor.normalize(request: {})", request);
         }
-        String result = substitute(normal, request);
+        String result = this.substitute(this.normal, request);
         result = result.replaceAll("(\r\n|\n\r|\r|\n)", " ");
         if (log.isDebugEnabled()) {
             log.debug("PreProcessor.normalize() returning: {}", result);
@@ -116,8 +120,8 @@ public class PreProcessor {
      * @param request client input
      * @return normalized client input
      */
-    public String denormalize(String request) {
-        return substitute(denormal, request);
+    public String denormalize(final String request) {
+        return this.substitute(this.denormal, request);
     }
 
     /**
@@ -126,8 +130,8 @@ public class PreProcessor {
      * @param input sentence
      * @return sentence with pronouns swapped
      */
-    public String person(String input) {
-        return substitute(person, input);
+    public String person(final String input) {
+        return this.substitute(this.person, input);
     }
 
     /**
@@ -136,8 +140,8 @@ public class PreProcessor {
      * @param input sentence
      * @return sentence with pronouns swapped
      */
-    public String person2(String input) {
-        return substitute(person2, input);
+    public String person2(final String input) {
+        return this.substitute(this.person2, input);
     }
 
     /**
@@ -146,8 +150,8 @@ public class PreProcessor {
      * @param input sentence
      * @return sentence with pronouns swapped
      */
-    public String gender(String input) {
-        return substitute(gender, input);
+    public String gender(final String input) {
+        return this.substitute(this.gender, input);
     }
 
     /**
@@ -160,7 +164,7 @@ public class PreProcessor {
         line = line.replace("。", ".");
         line = line.replace("？", "?");
         line = line.replace("！", "!");
-        String result[] = line.split("[\\.!\\?]");
+        final String result[] = line.split("[\\.!\\?]");
         for (int i = 0; i < result.length; i++) {
             result[i] = result[i].trim();
         }
@@ -173,7 +177,7 @@ public class PreProcessor {
      * @param infile  input file
      * @param outfile output file to write results
      */
-    public void normalizeFile(String infile, String outfile) {
+    public void normalizeFile(final String infile, final String outfile) {
         try (FileInputStream stream = new FileInputStream(infile)) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(outfile))) {
@@ -182,10 +186,10 @@ public class PreProcessor {
                     while ((strLine = reader.readLine()) != null) {
                         strLine = strLine.trim();
                         if (strLine.length() > 0) {
-                            String norm = normalize(strLine).toUpperCase();
-                            String sentences[] = sentenceSplit(norm);
+                            final String norm = this.normalize(strLine).toUpperCase();
+                            final String sentences[] = this.sentenceSplit(norm);
                             if (sentences.length > 1) {
-                                for (String s : sentences) {
+                                for (final String s : sentences) {
                                     log.info("{}-->{}", norm, s);
                                 }
                             }
@@ -200,7 +204,7 @@ public class PreProcessor {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error:", e);
         }
     }

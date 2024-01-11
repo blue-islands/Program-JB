@@ -32,8 +32,8 @@ public class ExplodeProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        String result = evalTagContent(node, ps, null);
+    public String eval(final Node node, final ParseState ps) {
+        final String result = this.evalTagContent(node, ps, null);
         return explode(result);
     }
 
@@ -43,8 +43,8 @@ public class ExplodeProcessor extends BaseTagProcessor {
      * @param input input string
      * @return exploded string
      */
-    private static String explode(String input) {
-        StringBuilder builder = new StringBuilder();
+    private static String explode(final String input) {
+        final StringBuilder builder = new StringBuilder();
         for (int i = 0; i < input.length(); i++) {
             builder.append(" ").append(input.charAt(i));
         }

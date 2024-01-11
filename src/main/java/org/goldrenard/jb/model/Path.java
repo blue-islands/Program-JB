@@ -16,12 +16,13 @@
  */
 package org.goldrenard.jb.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.util.ArrayList;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Linked list representation of Pattern Path and Input Path
@@ -29,6 +30,11 @@ import java.util.ArrayList;
 @Setter
 @Getter
 public class Path extends ArrayList<String> {
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
     private static final Logger log = LoggerFactory.getLogger(Path.class);
 
@@ -40,9 +46,9 @@ public class Path extends ArrayList<String> {
      * Constructor - class has public members
      */
     private Path() {
-        next = null;
-        word = null;
-        length = 0;
+        this.next = null;
+        this.word = null;
+        this.length = 0;
     }
 
     /**
@@ -62,8 +68,8 @@ public class Path extends ArrayList<String> {
      * @param path input path
      * @return sentence
      */
-    public static String pathToSentence(Path path) {
-        StringBuilder result = new StringBuilder();
+    public static String pathToSentence(final Path path) {
+        final StringBuilder result = new StringBuilder();
         for (Path p = path; p != null; p = p.next) {
             result.append(" ").append(p.word);
         }
@@ -76,15 +82,18 @@ public class Path extends ArrayList<String> {
      * @param array array of strings
      * @return sequence of strings as Path
      */
-    private static Path arrayToPath(String[] array) {
+    private static Path arrayToPath(final String[] array) {
         Path tail = null;
         Path head = null;
         for (int i = array.length - 1; i >= 0; i--) {
             head = new Path();
             head.word = array[i];
             head.next = tail;
-            if (tail == null) head.length = 1;
-            else head.length = tail.length + 1;
+            if (tail == null) {
+                head.length = 1;
+            } else {
+                head.length = tail.length + 1;
+            }
             tail = head;
         }
         return head;
@@ -97,11 +106,11 @@ public class Path extends ArrayList<String> {
      * @param index array index
      * @return Path form
      */
-    private static Path arrayToPath(String[] array, int index) {
+    private static Path arrayToPath(final String[] array, final int index) {
         if (index >= array.length) {
             return null;
         }
-        Path newPath = new Path();
+        final Path newPath = new Path();
         newPath.word = array[index];
         newPath.next = arrayToPath(array, index + 1);
         if (newPath.next == null) {
@@ -116,12 +125,14 @@ public class Path extends ArrayList<String> {
      * print a Path
      */
     public void print() {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         for (Path p = this; p != null; p = p.next) {
             builder.append(p.word).append(",");
         }
         String result = builder.toString();
-        if (result.endsWith(",")) result = result.substring(0, result.length() - 1);
+        if (result.endsWith(",")) {
+            result = result.substring(0, result.length() - 1);
+        }
         log.info(result);
     }
 }

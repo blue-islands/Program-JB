@@ -16,15 +16,19 @@
  */
 package org.goldrenard.jb.utils;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.FileUtils;
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.core.Bot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class Utilities {
 
@@ -50,9 +54,9 @@ public class Utilities {
         return line.replaceAll("\"\"", "\"");
     }
 
-    public static String tagTrim(String xmlExpression, String tagName) {
-        String stag = "<" + tagName + ">";
-        String etag = "</" + tagName + ">";
+    public static String tagTrim(String xmlExpression, final String tagName) {
+        final String stag = "<" + tagName + ">";
+        final String etag = "</" + tagName + ">";
         if (xmlExpression.length() >= (stag + etag).length()) {
             xmlExpression = xmlExpression.substring(stag.length());
             xmlExpression = xmlExpression.substring(0, xmlExpression.length() - etag.length());
@@ -60,33 +64,33 @@ public class Utilities {
         return xmlExpression;
     }
 
-    public static Set<String> stringSet(String... strings) {
+    public static Set<String> stringSet(final String... strings) {
         return new HashSet<>(Arrays.asList(strings));
     }
 
-    public static List<String> readFileLines(String filename) {
+    public static List<String> readFileLines(final String filename) {
         try {
-            File file = new File(filename);
+            final File file = new File(filename);
             if (file.exists()) {
-                List<String> lines = FileUtils.readLines(file, "UTF-8");
+                final List<String> lines = FileUtils.readLines(file, "UTF-8");
                 return lines.stream()
                         .filter(e -> !e.startsWith(Constants.text_comment_mark))
                         .map(String::trim)
                         .collect(Collectors.toList());
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
         return Collections.emptyList();
     }
 
-    public static String getCopyright(Bot bot, String AIMLFilename) {
+    public static String getCopyright(final Bot bot, final String AIMLFilename) {
         String copyright = "";
-        String year = CalendarUtils.year();
-        String date = CalendarUtils.date();
+        final String year = CalendarUtils.year();
+        final String date = CalendarUtils.date();
         try {
-            StringBuilder builder = new StringBuilder();
-            for (String part : readFileLines(bot.getConfigPath() + "/copyright.txt")) {
+            final StringBuilder builder = new StringBuilder();
+            for (final String part : readFileLines(bot.getConfigPath() + "/copyright.txt")) {
                 builder.append("<!-- ").append(part).append(" -->\n");
             }
             copyright = builder.toString();
@@ -98,7 +102,7 @@ public class Utilities {
             copyright = copyright.replace("[filename]", AIMLFilename);
             copyright = copyright.replace("[botmaster]", bot.getProperties().get("botmaster"));
             copyright = copyright.replace("[organization]", bot.getProperties().get("organization"));
-        } catch (Exception e) {//Catch exception if any
+        } catch (final Exception e) {//Catch exception if any
             log.error("Error: ", e);
         }
         return copyright;

@@ -31,7 +31,7 @@ public class ProgramProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
+    public String eval(final Node node, final ParseState ps) {
         return ps.getChatSession().getBot().getConfiguration().getProgramName();
     }
 }

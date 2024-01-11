@@ -31,33 +31,33 @@ public class TripleProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
+    public String eval(final Node node, final ParseState ps) {
         try {
             switch (node.getNodeName()) {
                 case "addtriple":
-                    return addTriple(node, ps);
+                    return this.addTriple(node, ps);
                 case "deletetriple":
-                    return deleteTriple(node, ps);
+                    return this.deleteTriple(node, ps);
                 default:
                     throw new IllegalStateException("Unsupported tag");
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
             return "";
         }
     }
 
-    private String deleteTriple(Node node, ParseState ps) {
-        String subject = getAttributeOrTagValue(node, ps, "subj");
-        String predicate = getAttributeOrTagValue(node, ps, "pred");
-        String object = getAttributeOrTagValue(node, ps, "obj");
+    private String deleteTriple(final Node node, final ParseState ps) {
+        final String subject = this.getAttributeOrTagValue(node, ps, "subj");
+        final String predicate = this.getAttributeOrTagValue(node, ps, "pred");
+        final String object = this.getAttributeOrTagValue(node, ps, "obj");
         return ps.getChatSession().getTripleStore().deleteTriple(subject, predicate, object);
     }
 
-    private String addTriple(Node node, ParseState ps) {
-        String subject = getAttributeOrTagValue(node, ps, "subj");
-        String predicate = getAttributeOrTagValue(node, ps, "pred");
-        String object = getAttributeOrTagValue(node, ps, "obj");
+    private String addTriple(final Node node, final ParseState ps) {
+        final String subject = this.getAttributeOrTagValue(node, ps, "subj");
+        final String predicate = this.getAttributeOrTagValue(node, ps, "pred");
+        final String object = this.getAttributeOrTagValue(node, ps, "obj");
         return ps.getChatSession().getTripleStore().addTriple(subject, predicate, object);
     }
 }

@@ -16,15 +16,15 @@
  */
 package org.goldrenard.jb.i18n;
 
-import org.goldrenard.jb.core.Bot;
-import org.goldrenard.jb.model.AIMLMap;
-import org.goldrenard.jb.model.AIMLSet;
-import org.goldrenard.jb.utils.Utilities;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.goldrenard.jb.core.Bot;
+import org.goldrenard.jb.model.AIMLMap;
+import org.goldrenard.jb.model.AIMLSet;
+import org.goldrenard.jb.utils.Utilities;
 
 public class Verbs {
     private static Set<String> es = Utilities.stringSet("sh", "ch", "th", "ss", "x");
@@ -40,8 +40,8 @@ public class Verbs {
     private static Map<String, String> be2being = new HashMap<>();
     private static Set<String> allVerbs = new HashSet<>();
 
-    public static String endsWith(String verb, Set<String> endings) {
-        for (String x : endings) {
+    public static String endsWith(final String verb, final Set<String> endings) {
+        for (final String x : endings) {
             if (verb.endsWith(x)) {
                 return x;
             }
@@ -49,15 +49,12 @@ public class Verbs {
         return null;
     }
 
-    public static String is(String verb) {
+    public static String is(final String verb) {
         String ending;
         if (irregular.contains(verb)) {
             return be2is.get(verb);
         }
-        if (verb.endsWith("go")) {
-            return verb + "es";
-        }
-        if ((ending = endsWith(verb, es)) != null) {
+        if (verb.endsWith("go") || ((ending = endsWith(verb, es)) != null)) {
             return verb + "es";
         }
         if ((ending = endsWith(verb, ies)) != null) {
@@ -100,7 +97,7 @@ public class Verbs {
         return verb + "ed";
     }
 
-    public static String being(String verb) {
+    public static String being(final String verb) {
         String ending;
         if (irregular.contains(verb)) {
             return be2being.get(verb);
@@ -132,7 +129,7 @@ public class Verbs {
         return verb + "ing";
     }
 
-    public static String been(String verb) {
+    public static String been(final String verb) {
         if (irregular.contains(verb)) {
             return (be2been.get(verb));
         }
@@ -145,7 +142,7 @@ public class Verbs {
 
         for (String x : Utilities.readFileLines("c:/ab/data/irrverbs.txt")) {
             x = x.toLowerCase();
-            String[] triple = x.split(",");
+            final String[] triple = x.split(",");
             if (triple.length == 5) {
                 irregular.add(triple[0]);
                 allVerbs.add(triple[0]);
@@ -157,29 +154,29 @@ public class Verbs {
         }
     }
 
-    public static void makeVerbSetsMaps(Bot bot) {
+    public static void makeVerbSetsMaps(final Bot bot) {
         getIrregulars();
         allVerbs.addAll(Utilities.readFileLines("c:/ab/data/verb300.txt"));
-        AIMLSet be = new AIMLSet("be", bot);
-        AIMLSet is = new AIMLSet("is", bot);
-        AIMLSet was = new AIMLSet("was", bot);
-        AIMLSet been = new AIMLSet("been", bot);
-        AIMLSet being = new AIMLSet("being", bot);
-        AIMLMap is2be = new AIMLMap("is2be", bot);
-        AIMLMap be2is = new AIMLMap("be2is", bot);
-        AIMLMap was2be = new AIMLMap("was2be", bot);
-        AIMLMap be2was = new AIMLMap("be2was", bot);
-        AIMLMap been2be = new AIMLMap("been2be", bot);
-        AIMLMap be2been = new AIMLMap("be2been", bot);
-        AIMLMap be2being = new AIMLMap("be2being", bot);
-        AIMLMap being2be = new AIMLMap("being2be", bot);
+        final AIMLSet be = new AIMLSet("be", bot);
+        final AIMLSet is = new AIMLSet("is", bot);
+        final AIMLSet was = new AIMLSet("was", bot);
+        final AIMLSet been = new AIMLSet("been", bot);
+        final AIMLSet being = new AIMLSet("being", bot);
+        final AIMLMap is2be = new AIMLMap("is2be", bot);
+        final AIMLMap be2is = new AIMLMap("be2is", bot);
+        final AIMLMap was2be = new AIMLMap("was2be", bot);
+        final AIMLMap be2was = new AIMLMap("be2was", bot);
+        final AIMLMap been2be = new AIMLMap("been2be", bot);
+        final AIMLMap be2been = new AIMLMap("be2been", bot);
+        final AIMLMap be2being = new AIMLMap("be2being", bot);
+        final AIMLMap being2be = new AIMLMap("being2be", bot);
 
-        for (String verb : allVerbs) {
-            String beForm = verb;
-            String isForm = is(verb);
-            String wasForm = was(verb);
-            String beenForm = been(verb);
-            String beingForm = being(verb);
+        for (final String verb : allVerbs) {
+            final String beForm = verb;
+            final String isForm = is(verb);
+            final String wasForm = was(verb);
+            final String beenForm = been(verb);
+            final String beingForm = being(verb);
             be.add(beForm);
             is.add(isForm);
             was.add(wasForm);

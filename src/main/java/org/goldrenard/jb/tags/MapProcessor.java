@@ -16,6 +16,8 @@
  */
 package org.goldrenard.jb.tags;
 
+import java.util.Set;
+
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.model.AIMLMap;
 import org.goldrenard.jb.model.ParseState;
@@ -24,8 +26,6 @@ import org.goldrenard.jb.utils.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
-
-import java.util.Set;
 
 /**
  * map an element of one string set to an element of another
@@ -40,16 +40,16 @@ public class MapProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
+    public String eval(final Node node, final ParseState ps) {
         String result = Constants.default_map;
-        Set<String> attributeNames = Utilities.stringSet("name");
-        String mapName = getAttributeOrTagValue(node, ps, "name");
-        String contents = evalTagContent(node, ps, attributeNames);
+        final Set<String> attributeNames = Utilities.stringSet("name");
+        final String mapName = this.getAttributeOrTagValue(node, ps, "name");
+        String contents = this.evalTagContent(node, ps, attributeNames);
         contents = contents.trim();
         if (mapName == null) {
             result = "<map>" + contents + "</map>"; // this is an OOB map tag (no attribute)
         } else {
-            AIMLMap map = ps.getChatSession().getBot().getMaps().get(mapName);
+            final AIMLMap map = ps.getChatSession().getBot().getMaps().get(mapName);
             if (map != null) {
                 result = map.get(contents.toUpperCase());
             }

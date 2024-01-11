@@ -84,7 +84,7 @@ public class EnglishNumberToWords {
         return numNames[number] + " hundred" + soFar;
     }
 
-    public static String convert(long number) {
+    public static String convert(final long number) {
         // 0 to 999 999 999 999
         if (number == 0) {
             return "zero";
@@ -93,18 +93,18 @@ public class EnglishNumberToWords {
         String snumber;
 
         // pad with "0"
-        String mask = "000000000000";
-        DecimalFormat df = new DecimalFormat(mask);
+        final String mask = "000000000000";
+        final DecimalFormat df = new DecimalFormat(mask);
         snumber = df.format(number);
 
         // XXXnnnnnnnnn
-        int billions = Integer.parseInt(snumber.substring(0, 3));
+        final int billions = Integer.parseInt(snumber.substring(0, 3));
         // nnnXXXnnnnnn
-        int millions = Integer.parseInt(snumber.substring(3, 6));
+        final int millions = Integer.parseInt(snumber.substring(3, 6));
         // nnnnnnXXXnnn
-        int hundredThousands = Integer.parseInt(snumber.substring(6, 9));
+        final int hundredThousands = Integer.parseInt(snumber.substring(6, 9));
         // nnnnnnnnnXXX
-        int thousands = Integer.parseInt(snumber.substring(9, 12));
+        final int thousands = Integer.parseInt(snumber.substring(9, 12));
 
         String tradBillions;
         switch (billions) {

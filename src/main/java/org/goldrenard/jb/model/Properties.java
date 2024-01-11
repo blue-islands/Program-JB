@@ -16,18 +16,26 @@
  */
 package org.goldrenard.jb.model;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+
 import org.goldrenard.jb.configuration.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.util.HashMap;
 
 /**
  * Bot Properties
  */
 public class Properties extends HashMap<String, String> {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(Properties.class);
 
     /**
@@ -36,8 +44,8 @@ public class Properties extends HashMap<String, String> {
      * @param key property name
      * @return property value or a string indicating the property is undefined
      */
-    public String get(String key) {
-        String result = super.get(key);
+    public String get(final String key) {
+        final String result = super.get(key);
         return result != null ? result : Constants.default_property;
     }
 
@@ -46,19 +54,19 @@ public class Properties extends HashMap<String, String> {
      *
      * @param in Input stream
      */
-    public int getPropertiesFromInputStream(InputStream in) {
+    public int getPropertiesFromInputStream(final InputStream in) {
         int cnt = 0;
         String strLine;
         try (BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF8"))) {
             while ((strLine = br.readLine()) != null) {
                 if (strLine.contains(":")) {
-                    String property = strLine.substring(0, strLine.indexOf(":"));
-                    String value = strLine.substring(strLine.indexOf(":") + 1);
-                    put(property, value);
+                    final String property = strLine.substring(0, strLine.indexOf(":"));
+                    final String value = strLine.substring(strLine.indexOf(":") + 1);
+                    this.put(property, value);
                     cnt++;
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error:", e);
         }
         return cnt;
@@ -69,7 +77,7 @@ public class Properties extends HashMap<String, String> {
      *
      * @param filename file containing bot properties
      */
-    public int getProperties(String filename) {
+    public int getProperties(final String filename) {
         int cnt = 0;
         if (log.isTraceEnabled()) {
             log.trace("Get Properties: {}", filename);
@@ -77,13 +85,13 @@ public class Properties extends HashMap<String, String> {
         try {
             // Open the file that is the first
             // command line parameter
-            File file = new File(filename);
+            final File file = new File(filename);
             if (file.exists()) {
                 try (FileInputStream fstream = new FileInputStream(filename)) {
-                    cnt = getPropertiesFromInputStream(fstream);
+                    cnt = this.getPropertiesFromInputStream(fstream);
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error:", e);
         }
         return cnt;

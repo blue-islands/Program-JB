@@ -16,39 +16,39 @@
  */
 package org.goldrenard.jb.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CalendarUtils {
 
     private static final Logger log = LoggerFactory.getLogger(CalendarUtils.class);
 
-    public static String formatTime(String formatString, long msSinceEpoch) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(formatString);
-        Calendar cal = Calendar.getInstance();
+    public static String formatTime(final String formatString, final long msSinceEpoch) {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat(formatString);
+        final Calendar cal = Calendar.getInstance();
         dateFormat.setCalendar(cal);
         return dateFormat.format(new Date(msSinceEpoch));
     }
 
     public static int timeZoneOffset() {
-        Calendar cal = Calendar.getInstance();
+        final Calendar cal = Calendar.getInstance();
         return (cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)) / (60 * 1000);
     }
 
     public static String year() {
-        Calendar cal = Calendar.getInstance();
+        final Calendar cal = Calendar.getInstance();
         return String.valueOf(cal.get(Calendar.YEAR));
     }
 
     public static String date() {
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMMMMMMMM dd, yyyy");
+        final Calendar cal = Calendar.getInstance();
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("MMMMMMMMM dd, yyyy");
         dateFormat.setCalendar(cal);
         return dateFormat.format(cal.getTime());
     }
@@ -63,11 +63,11 @@ public class CalendarUtils {
         if (timezone == null) {
             timezone = TimeZone.getDefault().getDisplayName();
         }
-        Date date = new Date();
+        final Date date = new Date();
         try {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(jformat);
+            final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(jformat);
             return simpleDateFormat.format(date);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("CalendarUtils.date Bad date: [Format = {}, Locale = {}, Timezone = {}]", jformat, locale, timezone, e);
         }
         return date.toString();

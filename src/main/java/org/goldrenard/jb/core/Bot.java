@@ -16,11 +16,24 @@
  */
 package org.goldrenard.jb.core;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+
 import org.goldrenard.jb.configuration.BotConfiguration;
 import org.goldrenard.jb.configuration.Constants;
-import org.goldrenard.jb.model.*;
+import org.goldrenard.jb.model.AIMLMap;
+import org.goldrenard.jb.model.AIMLSet;
+import org.goldrenard.jb.model.Category;
+import org.goldrenard.jb.model.Nodemapper;
+import org.goldrenard.jb.model.Properties;
 import org.goldrenard.jb.parser.MapsResource;
 import org.goldrenard.jb.parser.PronounsResource;
 import org.goldrenard.jb.parser.SetsResource;
@@ -32,10 +45,8 @@ import org.goldrenard.jb.utils.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Class representing the AIML bot
@@ -84,7 +95,7 @@ public class Bot {
      *
      * @param name Bot Name
      */
-    public Bot(String name) {
+    public Bot(final String name) {
         this(BotConfiguration.builder().name(name).build());
     }
 
@@ -93,64 +104,64 @@ public class Bot {
      *
      * @param configuration configuration
      */
-    public Bot(BotConfiguration configuration) {
+    public Bot(final BotConfiguration configuration) {
         this.configuration = configuration;
         this.name = configuration.getName();
-        setAllPaths(configuration);
+        this.setAllPaths(configuration);
         this.brain = new Graphmaster(this);
         this.learnfGraph = new Graphmaster(this, "learnf");
         this.learnGraph = new Graphmaster(this, "learn");
         this.preProcessor = new PreProcessor(this);
         this.processor = new AIMLProcessor(this);
-        addProperties();
+        this.addProperties();
 
-        int count = sets.read(setsPath);
+        int count = this.sets.read(this.setsPath);
         if (log.isDebugEnabled()) {
             log.debug("Loaded {} set elements.", count);
         }
 
-        count = maps.read(mapsPath);
+        count = this.maps.read(this.mapsPath);
         if (log.isDebugEnabled()) {
             log.debug("Loaded {} map elements.", count);
         }
 
-        count = pronouns.read(configPath);
+        count = this.pronouns.read(this.configPath);
         if (log.isDebugEnabled()) {
             log.debug("Loaded {} pronouns.", count);
         }
 
-        Date aimlDate = new Date(new File(aimlPath).lastModified());
-        Date aimlIFDate = new Date(new File(aimlifPath).lastModified());
+        final Date aimlDate = new Date(new File(this.aimlPath).lastModified());
+        final Date aimlIFDate = new Date(new File(this.aimlifPath).lastModified());
         if (log.isDebugEnabled()) {
             log.debug("AIML modified {} AIMLIF modified {}", aimlDate, aimlIFDate);
         }
 
         switch (configuration.getAction()) {
             case "aiml2csv":
-                addCategoriesFromAIML();
+                this.addCategoriesFromAIML();
                 break;
             case "csv2aiml":
             case "chat-app":
-                addCategoriesFromAIMLIF();
+                this.addCategoriesFromAIMLIF();
                 break;
             default:
                 if (aimlDate.after(aimlIFDate)) {
-                    addCategoriesFromAIML();
-                    writeAIMLIFFiles();
+                    this.addCategoriesFromAIML();
+                    this.writeAIMLIFFiles();
                 } else {
-                    addCategoriesFromAIMLIF();
-                    if (brain.getCategories().size() == 0) {
-                        addCategoriesFromAIML();
+                    this.addCategoriesFromAIMLIF();
+                    if (this.brain.getCategories().size() == 0) {
+                        this.addCategoriesFromAIML();
                     }
                 }
                 break;
         }
 
-        Category version = new Category(this, 0, "PROGRAM VERSION", "*", "*",
+        final Category version = new Category(this, 0, "PROGRAM VERSION", "*", "*",
                 configuration.getProgramName(), "update.aiml");
-        brain.addCategory(version);
-        brain.nodeStats();
-        learnfGraph.nodeStats();
+        this.brain.addCategory(version);
+        this.brain.nodeStats();
+        this.learnfGraph.nodeStats();
     }
 
     /**
@@ -158,17 +169,17 @@ public class Bot {
      *
      * @param configuration configuration of Program AB
      */
-    private void setAllPaths(BotConfiguration configuration) {
+    private void setAllPaths(final BotConfiguration configuration) {
         this.rootPath = configuration.getPath();
-        String botNamePath = this.rootPath + "/bots/" + name;
+        final String botNamePath = this.rootPath + "/bots/" + this.name;
         if (log.isTraceEnabled()) {
-            log.trace("Init bot: Name = {} Path = {}", name, botNamePath);
+            log.trace("Init bot: Name = {} Path = {}", this.name, botNamePath);
         }
-        aimlPath = botNamePath + "/aiml";
-        aimlifPath = botNamePath + "/aimlif";
-        configPath = botNamePath + "/config";
-        setsPath = botNamePath + "/sets";
-        mapsPath = botNamePath + "/maps";
+        this.aimlPath = botNamePath + "/aiml";
+        this.aimlifPath = botNamePath + "/aimlif";
+        this.configPath = botNamePath + "/config";
+        this.setsPath = botNamePath + "/sets";
+        this.mapsPath = botNamePath + "/maps";
     }
 
     /**
@@ -177,15 +188,15 @@ public class Bot {
      * @param file           name of AIML file
      * @param moreCategories list of categories
      */
-    private void addMoreCategories(String file, ArrayList<Category> moreCategories) {
+    private void addMoreCategories(final String file, final ArrayList<Category> moreCategories) {
         if (file.contains(Constants.learnfAimlFile)) {
-            for (Category c : moreCategories) {
-                brain.addCategory(c);
-                learnfGraph.addCategory(c);
+            for (final Category c : moreCategories) {
+                this.brain.addCategory(c);
+                this.learnfGraph.addCategory(c);
             }
         } else {
-            for (Category c : moreCategories) {
-                brain.addCategory(c);
+            for (final Category c : moreCategories) {
+                this.brain.addCategory(c);
             }
         }
     }
@@ -194,19 +205,19 @@ public class Bot {
      * Load all brain categories from AIML directory
      */
     private void addCategoriesFromAIML() {
-        Timer timer = new Timer();
+        final Timer timer = new Timer();
         timer.start();
         int count = 0;
         try {
             // Directory path here
             String file;
-            File folder = new File(aimlPath);
+            final File folder = new File(this.aimlPath);
             if (folder.exists()) {
-                File[] listOfFiles = IOUtils.listFiles(folder);
+                final File[] listOfFiles = IOUtils.listFiles(folder);
                 if (log.isTraceEnabled()) {
-                    log.trace("Loading AIML files from {}", aimlPath);
+                    log.trace("Loading AIML files from {}", this.aimlPath);
                 }
-                for (File listOfFile : listOfFiles) {
+                for (final File listOfFile : listOfFiles) {
                     if (listOfFile.isFile()) {
                         file = listOfFile.getName();
                         if (file.endsWith(".aiml") || file.endsWith(".AIML")) {
@@ -214,19 +225,19 @@ public class Bot {
                                 log.trace("Reading AIML {}", file);
                             }
                             try {
-                                ArrayList<Category> moreCategories = processor.AIMLToCategories(aimlPath, file);
-                                addMoreCategories(file, moreCategories);
+                                final ArrayList<Category> moreCategories = this.processor.AIMLToCategories(this.aimlPath, file);
+                                this.addMoreCategories(file, moreCategories);
                                 count += moreCategories != null ? moreCategories.size() : 0;
-                            } catch (Exception e) {
+                            } catch (final Exception e) {
                                 log.error("Problem loading {}", file, e);
                             }
                         }
                     }
                 }
             } else {
-                log.warn("addCategoriesFromAIML: {} does not exist.", aimlPath);
+                log.warn("addCategoriesFromAIML: {} does not exist.", this.aimlPath);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
         if (log.isTraceEnabled()) {
@@ -238,30 +249,30 @@ public class Bot {
      * load all brain categories from AIMLIF directory
      */
     private void addCategoriesFromAIMLIF() {
-        Timer timer = new Timer();
+        final Timer timer = new Timer();
         timer.start();
         int count = 0;
         try {
             // Directory path here
             String file;
-            File folder = new File(aimlifPath);
+            final File folder = new File(this.aimlifPath);
             if (folder.exists()) {
-                File[] listOfFiles = IOUtils.listFiles(folder);
+                final File[] listOfFiles = IOUtils.listFiles(folder);
                 if (log.isTraceEnabled()) {
-                    log.trace("Loading AIML files from {}", aimlifPath);
+                    log.trace("Loading AIML files from {}", this.aimlifPath);
                 }
-                for (File listOfFile : listOfFiles) {
+                for (final File listOfFile : listOfFiles) {
                     if (listOfFile.isFile()) {
                         file = listOfFile.getName();
-                        if (file.endsWith(configuration.getAimlifFileSuffix()) || file.endsWith(configuration.getAimlifFileSuffix().toUpperCase())) {
+                        if (file.endsWith(this.configuration.getAimlifFileSuffix()) || file.endsWith(this.configuration.getAimlifFileSuffix().toUpperCase())) {
                             if (log.isTraceEnabled()) {
                                 log.trace("Reading AIML {}", file);
                             }
                             try {
-                                ArrayList<Category> moreCategories = readIFCategories(aimlifPath + "/" + file);
+                                final ArrayList<Category> moreCategories = this.readIFCategories(this.aimlifPath + "/" + file);
                                 count += moreCategories.size();
-                                addMoreCategories(file, moreCategories);
-                            } catch (Exception e) {
+                                this.addMoreCategories(file, moreCategories);
+                            } catch (final Exception e) {
                                 log.error("Problem loading {}", file, e);
                             }
                         }
@@ -269,9 +280,9 @@ public class Bot {
                 }
 
             } else {
-                log.warn("addCategoriesFromAIMLIF: {} does not exist.", aimlifPath);
+                log.warn("addCategoriesFromAIMLIF: {} does not exist.", this.aimlifPath);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
         if (log.isTraceEnabled()) {
@@ -283,8 +294,8 @@ public class Bot {
      * write all AIML and AIMLIF categories
      */
     public void writeQuit() {
-        writeAIMLIFFiles();
-        writeAIMLFiles();
+        this.writeAIMLIFFiles();
+        this.writeAIMLFiles();
     }
 
     /**
@@ -293,19 +304,19 @@ public class Bot {
      * @param graph    Graphmaster to store categories
      * @param fileName file name of AIMLIF file
      */
-    public void readCertainIFCategories(Graphmaster graph, String fileName) {
+    public void readCertainIFCategories(final Graphmaster graph, final String fileName) {
         int count;
-        String filePath = aimlifPath + "/" + fileName + configuration.getAimlifFileSuffix();
-        File file = new File(filePath);
+        final String filePath = this.aimlifPath + "/" + fileName + this.configuration.getAimlifFileSuffix();
+        final File file = new File(filePath);
         if (file.exists()) {
             try {
-                ArrayList<Category> certainCategories = readIFCategories(filePath);
-                for (Category d : certainCategories) {
+                final ArrayList<Category> certainCategories = this.readIFCategories(filePath);
+                for (final Category d : certainCategories) {
                     graph.addCategory(d);
                 }
                 count = certainCategories.size();
                 log.info("readCertainIFCategories {} categories from {}", count, filePath);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.error("Problem loading {}", file, e);
             }
         } else {
@@ -319,12 +330,12 @@ public class Bot {
      * @param graph the Graphmaster containing the categories to write
      * @param file  the destination AIMLIF file
      */
-    public boolean writeCertainIFCategories(Graphmaster graph, String file) {
+    public boolean writeCertainIFCategories(final Graphmaster graph, final String file) {
         if (log.isTraceEnabled()) {
             log.trace("writeCertainIFCaegories {} size={}", file, graph.getCategories().size());
         }
-        writeIFCategories(graph.getCategories(), file + configuration.getAimlifFileSuffix());
-        File dir = new File(aimlifPath);
+        this.writeIFCategories(graph.getCategories(), file + this.configuration.getAimlifFileSuffix());
+        final File dir = new File(this.aimlifPath);
         return dir.setLastModified(new Date().getTime());
     }
 
@@ -332,7 +343,7 @@ public class Bot {
      * write learned categories to AIMLIF file
      */
     public boolean writeLearnfIFCategories() {
-        return writeCertainIFCategories(learnfGraph, Constants.learnfAimlFile);
+        return this.writeCertainIFCategories(this.learnfGraph, Constants.learnfAimlFile);
     }
 
     /**
@@ -341,17 +352,18 @@ public class Bot {
      * @param cats     array list of categories
      * @param filename AIMLIF filename
      */
-    private void writeIFCategories(ArrayList<Category> cats, String filename) {
-        File existsPath = new File(aimlifPath);
-        if (existsPath.exists())
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(aimlifPath + "/" + filename))) {
-                for (Category category : cats) {
+    private void writeIFCategories(final ArrayList<Category> cats, final String filename) {
+        final File existsPath = new File(this.aimlifPath);
+        if (existsPath.exists()) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(this.aimlifPath + "/" + filename))) {
+                for (final Category category : cats) {
                     writer.write(Category.categoryToIF(category));
                     writer.newLine();
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.error("writeIFCategories problem {}", filename, e);
             }
+        }
     }
 
     /**
@@ -362,39 +374,39 @@ public class Bot {
             log.trace("writeAIMLIFFiles");
         }
 
-        HashMap<String, BufferedWriter> fileMap = new HashMap<>();
-        Category build = new Category(this, 0, "BRAIN BUILD", "*", "*", new Date().toString(), "update.aiml");
-        brain.addCategory(build);
-        ArrayList<Category> brainCategories = brain.getCategories();
+        final HashMap<String, BufferedWriter> fileMap = new HashMap<>();
+        final Category build = new Category(this, 0, "BRAIN BUILD", "*", "*", new Date().toString(), "update.aiml");
+        this.brain.addCategory(build);
+        final ArrayList<Category> brainCategories = this.brain.getCategories();
         brainCategories.sort(Category.CATEGORY_NUMBER_COMPARATOR);
 
-        File existsPath = new File(aimlifPath);
+        final File existsPath = new File(this.aimlifPath);
         if (existsPath.exists()) {
-            for (Category c : brainCategories) {
+            for (final Category c : brainCategories) {
                 try {
                     BufferedWriter bw;
-                    String fileName = c.getFilename();
+                    final String fileName = c.getFilename();
                     if (fileMap.containsKey(fileName)) {
                         bw = fileMap.get(fileName);
                     } else {
-                        bw = new BufferedWriter(new FileWriter(aimlifPath + "/" + fileName + configuration.getAimlifFileSuffix()));
+                        bw = new BufferedWriter(new FileWriter(this.aimlifPath + "/" + fileName + this.configuration.getAimlifFileSuffix()));
                         fileMap.put(fileName, bw);
                     }
                     bw.write(Category.categoryToIF(c));
                     bw.newLine();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     log.error("Error: ", e);
                 }
             }
-            for (String set : fileMap.keySet()) {
-                BufferedWriter bw = fileMap.get(set);
+            for (final String set : fileMap.keySet()) {
+                final BufferedWriter bw = fileMap.get(set);
                 //Close the bw
                 try {
                     if (bw != null) {
                         bw.flush();
                         bw.close();
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     log.error("Error closing writer {}", set, e);
                 }
             }
@@ -410,22 +422,22 @@ public class Bot {
         if (log.isTraceEnabled()) {
             log.trace("writeAIMLFiles");
         }
-        HashMap<String, BufferedWriter> fileMap = new HashMap<>();
-        Category build = new Category(this, 0, "BRAIN BUILD", "*", "*", new Date().toString(), "update.aiml");
-        brain.addCategory(build);
+        final HashMap<String, BufferedWriter> fileMap = new HashMap<>();
+        final Category build = new Category(this, 0, "BRAIN BUILD", "*", "*", new Date().toString(), "update.aiml");
+        this.brain.addCategory(build);
 
-        ArrayList<Category> brainCategories = brain.getCategories();
+        final ArrayList<Category> brainCategories = this.brain.getCategories();
         brainCategories.sort(Category.CATEGORY_NUMBER_COMPARATOR);
-        for (Category c : brainCategories) {
-            if (!c.getFilename().equals(Constants.nullAimlFile))
+        for (final Category c : brainCategories) {
+            if (!c.getFilename().equals(Constants.nullAimlFile)) {
                 try {
                     BufferedWriter bw;
-                    String fileName = c.getFilename();
+                    final String fileName = c.getFilename();
                     if (fileMap.containsKey(fileName)) {
                         bw = fileMap.get(fileName);
                     } else {
-                        String copyright = Utilities.getCopyright(this, fileName);
-                        bw = new BufferedWriter(new FileWriter(aimlPath + "/" + fileName));
+                        final String copyright = Utilities.getCopyright(this, fileName);
+                        bw = new BufferedWriter(new FileWriter(this.aimlPath + "/" + fileName));
                         fileMap.put(fileName, bw);
                         bw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "\n" +
                                 "<aiml>\n");
@@ -434,12 +446,13 @@ public class Bot {
                     }
                     bw.write(Category.categoryToAIML(c) + "\n");
                     //bw.newLine();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     log.error("Error: ", e);
                 }
+            }
         }
-        for (String set : fileMap.keySet()) {
-            BufferedWriter bw = fileMap.get(set);
+        for (final String set : fileMap.keySet()) {
+            final BufferedWriter bw = fileMap.get(set);
             //Close the bw
             try {
                 if (bw != null) {
@@ -447,11 +460,11 @@ public class Bot {
                     bw.flush();
                     bw.close();
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 log.error("Error closing writer {}", set, e);
             }
         }
-        File dir = new File(aimlPath);
+        final File dir = new File(this.aimlPath);
         return dir.setLastModified(new Date().getTime());
     }
 
@@ -460,8 +473,8 @@ public class Bot {
      */
     private void addProperties() {
         try {
-            properties.getProperties(configPath + "/properties.txt");
-        } catch (Exception e) {
+            this.properties.getProperties(this.configPath + "/properties.txt");
+        } catch (final Exception e) {
             log.error("Error reading properties {}", e);
         }
     }
@@ -472,41 +485,41 @@ public class Bot {
      * @param filename name of AIMLIF file
      * @return array list of categories read
      */
-    private ArrayList<Category> readIFCategories(String filename) {
-        ArrayList<Category> categories = new ArrayList<>();
+    private ArrayList<Category> readIFCategories(final String filename) {
+        final ArrayList<Category> categories = new ArrayList<>();
         try (FileInputStream fstream = new FileInputStream(filename)) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(fstream))) {
                 String strLine;
                 while ((strLine = br.readLine()) != null) {
                     try {
-                        Category c = Category.IFToCategory(this, strLine);
+                        final Category c = Category.IFToCategory(this, strLine);
                         categories.add(c);
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         log.error("Invalid AIMLIF in {} line {}", filename, strLine);
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
         return categories;
     }
 
     public void deleteLearnfCategories() {
-        ArrayList<Category> learnfCategories = learnfGraph.getCategories();
-        deleteLearnCategories(learnfCategories);
-        learnfGraph = new Graphmaster(this);
+        final ArrayList<Category> learnfCategories = this.learnfGraph.getCategories();
+        this.deleteLearnCategories(learnfCategories);
+        this.learnfGraph = new Graphmaster(this);
     }
 
     public void deleteLearnCategories() {
-        ArrayList<Category> learnCategories = learnGraph.getCategories();
-        deleteLearnCategories(learnCategories);
-        learnGraph = new Graphmaster(this);
+        final ArrayList<Category> learnCategories = this.learnGraph.getCategories();
+        this.deleteLearnCategories(learnCategories);
+        this.learnGraph = new Graphmaster(this);
     }
 
-    private void deleteLearnCategories(ArrayList<Category> learnCategories) {
-        for (Category c : learnCategories) {
-            Nodemapper n = brain.findNode(c);
+    private void deleteLearnCategories(final ArrayList<Category> learnCategories) {
+        for (final Category c : learnCategories) {
+            final Nodemapper n = this.brain.findNode(c);
             log.info("Found node {} for {}", n, c.inputThatTopic());
             if (n != null) {
                 n.setCategory(null);
@@ -518,7 +531,7 @@ public class Bot {
      * check Graphmaster for shadowed categories
      */
     public void shadowChecker() {
-        shadowChecker(brain.getRoot());
+        this.shadowChecker(this.brain.getRoot());
     }
 
     /**
@@ -526,47 +539,47 @@ public class Bot {
      *
      * @param node Node mapper
      */
-    private void shadowChecker(Nodemapper node) {
+    private void shadowChecker(final Nodemapper node) {
         if (NodemapperOperator.isLeaf(node)) {
             String input = node.getCategory().getPattern();
-            input = brain.replaceBotProperties(input);
+            input = this.brain.replaceBotProperties(input);
             input = input
                     .replace("*", "XXX")
                     .replace("_", "XXX")
                     .replace("^", "")
                     .replace("#", "");
-            String that = node.getCategory().getThat()
+            final String that = node.getCategory().getThat()
                     .replace("*", "XXX")
                     .replace("_", "XXX")
                     .replace("^", "")
                     .replace("#", "");
-            String topic = node.getCategory().getTopic()
+            final String topic = node.getCategory().getTopic()
                     .replace("*", "XXX")
                     .replace("_", "XXX")
                     .replace("^", "")
                     .replace("#", "");
-            input = instantiateSets(input);
+            input = this.instantiateSets(input);
             log.debug("shadowChecker: input={}", input);
-            Nodemapper match = brain.match(input, that, topic);
+            final Nodemapper match = this.brain.match(input, that, topic);
             if (match != node) {
                 log.debug("             {}", Graphmaster.inputThatTopic(input, that, topic));
                 log.debug("MATCHED:     {}", match.getCategory().inputThatTopic());
                 log.debug("SHOULD MATCH:{}", node.getCategory().inputThatTopic());
             }
         } else {
-            for (String key : NodemapperOperator.keySet(node)) {
-                shadowChecker(NodemapperOperator.get(node, key));
+            for (final String key : NodemapperOperator.keySet(node)) {
+                this.shadowChecker(NodemapperOperator.get(node, key));
             }
         }
     }
 
-    private String instantiateSets(String pattern) {
-        String[] splitPattern = pattern.split(" ");
-        StringBuilder builder = new StringBuilder();
+    private String instantiateSets(final String pattern) {
+        final String[] splitPattern = pattern.split(" ");
+        final StringBuilder builder = new StringBuilder();
         for (String x : splitPattern) {
             if (x.startsWith("<SET>")) {
-                String setName = AIMLProcessor.trimTag(x, "SET");
-                AIMLSet set = sets.get(setName);
+                final String setName = AIMLProcessor.trimTag(x, "SET");
+                final AIMLSet set = this.sets.get(setName);
                 x = set != null ? "FOUNDITEM" : "NOTFOUND";
             }
             builder.append(" ").append(x);

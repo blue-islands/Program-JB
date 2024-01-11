@@ -16,7 +16,9 @@
  */
 package org.goldrenard.jb.utils;
 
-import net.reduls.sanmoku.Tagger;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.goldrenard.jb.core.AIMLProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +26,14 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.stream.Collectors;
+import com.atilika.kuromoji.ipadic.Token;
+import com.atilika.kuromoji.ipadic.Tokenizer;
 
 public class JapaneseUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(JapaneseUtils.class);
+    private static final Logger    log       = LoggerFactory.getLogger(JapaneseUtils.class);
+
+    private static final Tokenizer tokenizer = new Tokenizer();
 
     /**
      * Tokenize a fragment of the input that contains only text
@@ -36,12 +41,15 @@ public class JapaneseUtils {
      * @param fragment fragment of input containing only text and no XML tags
      * @return tokenized fragment
      */
-    private static String tokenizeFragment(String fragment) {
-        if (log.isDebugEnabled()) {
-            log.debug("buildFragment: {}", fragment);
+    private static String tokenizeFragment(final String fragment) {
+
+        if (JapaneseUtils.log.isDebugEnabled()) {
+            JapaneseUtils.log.debug("buildFragment: {}", fragment);
         }
-        return Tagger.parse(fragment).stream().map(e -> e.surface).collect(Collectors.joining(" "));
+        final List <Token> tokens = JapaneseUtils.tokenizer.tokenize(fragment);
+        return tokens.stream().map(Token::getSurface).collect(Collectors.joining(" "));
     }
+
 
     /**
      * Morphological analysis of an input sentence that contains an AIML pattern.
@@ -49,89 +57,106 @@ public class JapaneseUtils {
      * @param sentence
      * @return morphed sentence with one space between words, preserving XML markup and AIML $ operation
      */
-    public static String tokenizeSentence(String sentence) {
-        if (log.isDebugEnabled()) {
-            log.debug("tokenizeSentence: {}", sentence);
+    public static String tokenizeSentence(final String sentence) {
+
+        if (JapaneseUtils.log.isDebugEnabled()) {
+            JapaneseUtils.log.debug("tokenizeSentence: {}", sentence);
         }
         String result = "";
-        result = tokenizeXML(sentence);
+        result = JapaneseUtils.tokenizeXML(sentence);
         if (result != null) {
-            while (result.contains("$ ")) result = result.replace("$ ", "$");
-            while (result.contains("  ")) result = result.replace("  ", " ");
-            while (result.contains("anon ")) result = result.replace("anon ", "anon"); // for Triple Store
+            while (result.contains("$ ")) {
+                result = result.replace("$ ", "$");
+            }
+            while (result.contains("  ")) {
+                result = result.replace("  ", " ");
+            }
+            while (result.contains("anon ")) {
+                result = result.replace("anon ", "anon"); // for Triple Store
+            }
             result = result.trim();
-            if (log.isTraceEnabled()) {
-                log.trace("tokenizeSentence: {} --> result: {}", sentence, result);
+            if (JapaneseUtils.log.isTraceEnabled()) {
+                JapaneseUtils.log.trace("tokenizeSentence: {} --> result: {}", sentence, result);
             }
         }
         return result;
     }
 
+
     private static String tokenizeXML(String xmlExpression) {
-        if (log.isDebugEnabled()) {
-            log.debug("tokenizeXML: {}", xmlExpression);
+
+        if (JapaneseUtils.log.isDebugEnabled()) {
+            JapaneseUtils.log.debug("tokenizeXML: {}", xmlExpression);
         }
         String response = "";
         try {
             xmlExpression = "<sentence>" + xmlExpression + "</sentence>";
-            Node root = DomUtils.parseString(xmlExpression);
-            response = recursEval(root);
-        } catch (Exception e) {
-            log.error("Error:", e);
+            final Node root = DomUtils.parseString(xmlExpression);
+            response = JapaneseUtils.recursEval(root);
+        } catch (final Exception e) {
+            JapaneseUtils.log.error("Error:", e);
         }
         return AIMLProcessor.trimTag(response, "sentence");
     }
 
-    private static String recursEval(Node node) {
+
+    private static String recursEval(final Node node) {
+
         try {
-            String nodeName = node.getNodeName();
-            if (log.isDebugEnabled()) {
-                log.debug("recursEval: {}", nodeName);
+            final String nodeName = node.getNodeName();
+            if (JapaneseUtils.log.isDebugEnabled()) {
+                JapaneseUtils.log.debug("recursEval: {}", nodeName);
             }
             switch (nodeName) {
                 case "#text":
-                    return tokenizeFragment(node.getNodeValue());
+                    return JapaneseUtils.tokenizeFragment(node.getNodeValue());
                 case "sentence":
-                    return evalTagContent(node);
+                    return JapaneseUtils.evalTagContent(node);
                 default:
-                    return genericXML(node);
+                    return JapaneseUtils.genericXML(node);
             }
-        } catch (Exception e) {
-            log.debug("recursEval failed", e);
+        } catch (final Exception e) {
+            JapaneseUtils.log.debug("recursEval failed", e);
         }
         return "JP Morph Error";
     }
 
-    private static String genericXML(Node node) {
-        if (log.isDebugEnabled()) {
-            log.debug("genericXML: {}", node.getNodeName());
+
+    private static String genericXML(final Node node) {
+
+        if (JapaneseUtils.log.isDebugEnabled()) {
+            JapaneseUtils.log.debug("genericXML: {}", node.getNodeName());
         }
-        String result = evalTagContent(node);
-        return unevaluatedXML(result, node);
+        final String result = JapaneseUtils.evalTagContent(node);
+        return JapaneseUtils.unevaluatedXML(result, node);
     }
 
-    private static String evalTagContent(Node node) {
-        if (log.isDebugEnabled()) {
-            log.debug("evalTagContent: {}", node.getNodeName());
+
+    private static String evalTagContent(final Node node) {
+
+        if (JapaneseUtils.log.isDebugEnabled()) {
+            JapaneseUtils.log.debug("evalTagContent: {}", node.getNodeName());
         }
-        StringBuilder result = new StringBuilder();
+        final StringBuilder result = new StringBuilder();
         try {
-            NodeList childList = node.getChildNodes();
+            final NodeList childList = node.getChildNodes();
             for (int i = 0; i < childList.getLength(); i++) {
-                Node child = childList.item(i);
-                result.append(recursEval(child));
+                final Node child = childList.item(i);
+                result.append(JapaneseUtils.recursEval(child));
             }
-        } catch (Exception e) {
-            log.warn("Something went wrong with evalTagContent", e);
+        } catch (final Exception e) {
+            JapaneseUtils.log.warn("Something went wrong with evalTagContent", e);
         }
         return result.toString();
     }
 
-    private static String unevaluatedXML(String result, Node node) {
-        String nodeName = node.getNodeName();
-        StringBuilder attributes = new StringBuilder();
+
+    private static String unevaluatedXML(final String result, final Node node) {
+
+        final String nodeName = node.getNodeName();
+        final StringBuilder attributes = new StringBuilder();
         if (node.hasAttributes()) {
-            NamedNodeMap XMLAttributes = node.getAttributes();
+            final NamedNodeMap XMLAttributes = node.getAttributes();
             for (int i = 0; i < XMLAttributes.getLength(); i++) {
                 attributes
                         .append(" ")
@@ -143,8 +168,7 @@ public class JapaneseUtils {
         }
         if ("".equals(result)) {
             return " <" + nodeName + attributes + "/> ";
-        } else {
-            return " <" + nodeName + attributes + ">" + result + "</" + nodeName + "> ";   // add spaces
         }
+        return " <" + nodeName + attributes + ">" + result + "</" + nodeName + "> "; // add spaces
     }
 }

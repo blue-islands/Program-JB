@@ -16,13 +16,62 @@
  */
 package org.goldrenard.jb.core;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.model.Category;
 import org.goldrenard.jb.model.Nodemapper;
 import org.goldrenard.jb.model.ParseState;
 import org.goldrenard.jb.model.Request;
-import org.goldrenard.jb.tags.*;
+import org.goldrenard.jb.tags.BotProcessor;
+import org.goldrenard.jb.tags.CommentProcessor;
+import org.goldrenard.jb.tags.ConditionProcessor;
+import org.goldrenard.jb.tags.DateProcessor;
+import org.goldrenard.jb.tags.DenormalizeProcessor;
+import org.goldrenard.jb.tags.ExplodeProcessor;
+import org.goldrenard.jb.tags.FirstProcessor;
+import org.goldrenard.jb.tags.FormalProcessor;
+import org.goldrenard.jb.tags.GenderProcessor;
+import org.goldrenard.jb.tags.IdProcessor;
+import org.goldrenard.jb.tags.InputProcessor;
+import org.goldrenard.jb.tags.IntervalProcessor;
+import org.goldrenard.jb.tags.JavaScriptProcessor;
+import org.goldrenard.jb.tags.LearnProcessor;
+import org.goldrenard.jb.tags.LowercaseProcessor;
+import org.goldrenard.jb.tags.MapProcessor;
+import org.goldrenard.jb.tags.NormalizeProcessor;
+import org.goldrenard.jb.tags.Person2Processor;
+import org.goldrenard.jb.tags.PersonProcessor;
+import org.goldrenard.jb.tags.PredicateProcessor;
+import org.goldrenard.jb.tags.ProgramProcessor;
+import org.goldrenard.jb.tags.RandomProcessor;
+import org.goldrenard.jb.tags.RequestProcessor;
+import org.goldrenard.jb.tags.ResetLearnProcessor;
+import org.goldrenard.jb.tags.ResponseProcessor;
+import org.goldrenard.jb.tags.RestProcessor;
+import org.goldrenard.jb.tags.SelectProcessor;
+import org.goldrenard.jb.tags.SentenceProcessor;
+import org.goldrenard.jb.tags.SizeProcessor;
+import org.goldrenard.jb.tags.SrProcessor;
+import org.goldrenard.jb.tags.SraiProcessor;
+import org.goldrenard.jb.tags.SraixProcessor;
+import org.goldrenard.jb.tags.StarProcessor;
+import org.goldrenard.jb.tags.SystemProcessor;
+import org.goldrenard.jb.tags.TemplateProcessor;
+import org.goldrenard.jb.tags.TextProcessor;
+import org.goldrenard.jb.tags.ThatProcessor;
+import org.goldrenard.jb.tags.ThatStarProcessor;
+import org.goldrenard.jb.tags.ThinkProcessor;
+import org.goldrenard.jb.tags.TopicStarProcessor;
+import org.goldrenard.jb.tags.TripleProcessor;
+import org.goldrenard.jb.tags.UniqProcessor;
+import org.goldrenard.jb.tags.UppercaseProcessor;
+import org.goldrenard.jb.tags.VocabularyProcessor;
 import org.goldrenard.jb.tags.base.AIMLTagProcessor;
 import org.goldrenard.jb.utils.DomUtils;
 import org.goldrenard.jb.utils.JapaneseUtils;
@@ -31,8 +80,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.util.*;
 
 /**
  * The core AIML parser and interpreter.
@@ -44,57 +91,57 @@ public class AIMLProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(AIMLProcessor.class);
 
-    private Map<String, AIMLTagProcessor> nodeProcessors = new HashMap<>();
+    private final Map<String, AIMLTagProcessor> nodeProcessors = new HashMap<>();
 
     private final Bot bot;
 
-    public AIMLProcessor(Bot bot) {
+    public AIMLProcessor(final Bot bot) {
         this.bot = bot;
-        registerProcessor(new BotProcessor());
-        registerProcessor(new CommentProcessor());
-        registerProcessor(new ConditionProcessor());
-        registerProcessor(new DateProcessor());
-        registerProcessor(new DenormalizeProcessor());
-        registerProcessor(new ExplodeProcessor());
-        registerProcessor(new FirstProcessor());
-        registerProcessor(new FormalProcessor());
-        registerProcessor(new GenderProcessor());
-        registerProcessor(new IdProcessor());
-        registerProcessor(new InputProcessor());
-        registerProcessor(new IntervalProcessor());
-        registerProcessor(new JavaScriptProcessor());
-        registerProcessor(new LearnProcessor());
-        registerProcessor(new LowercaseProcessor());
-        registerProcessor(new MapProcessor());
-        registerProcessor(new NormalizeProcessor());
-        registerProcessor(new Person2Processor());
-        registerProcessor(new PersonProcessor());
-        registerProcessor(new PredicateProcessor());
-        registerProcessor(new ProgramProcessor());
-        registerProcessor(new RandomProcessor());
-        registerProcessor(new RequestProcessor());
-        registerProcessor(new ResetLearnProcessor());
-        registerProcessor(new ResponseProcessor());
-        registerProcessor(new RestProcessor());
-        registerProcessor(new SelectProcessor());
-        registerProcessor(new SentenceProcessor());
-        registerProcessor(new SizeProcessor());
-        registerProcessor(new SraiProcessor());
-        registerProcessor(new SraixProcessor());
-        registerProcessor(new SrProcessor());
-        registerProcessor(new StarProcessor());
-        registerProcessor(new SystemProcessor());
-        registerProcessor(new TemplateProcessor());
-        registerProcessor(new TextProcessor());
-        registerProcessor(new ThatProcessor());
-        registerProcessor(new ThatStarProcessor());
-        registerProcessor(new ThinkProcessor());
-        registerProcessor(new TopicStarProcessor());
-        registerProcessor(new TripleProcessor());
-        registerProcessor(new UniqProcessor());
-        registerProcessor(new UppercaseProcessor());
-        registerProcessor(new VocabularyProcessor());
-        List<AIMLTagProcessor> extensions = bot.getConfiguration().getTagProcessors();
+        this.registerProcessor(new BotProcessor());
+        this.registerProcessor(new CommentProcessor());
+        this.registerProcessor(new ConditionProcessor());
+        this.registerProcessor(new DateProcessor());
+        this.registerProcessor(new DenormalizeProcessor());
+        this.registerProcessor(new ExplodeProcessor());
+        this.registerProcessor(new FirstProcessor());
+        this.registerProcessor(new FormalProcessor());
+        this.registerProcessor(new GenderProcessor());
+        this.registerProcessor(new IdProcessor());
+        this.registerProcessor(new InputProcessor());
+        this.registerProcessor(new IntervalProcessor());
+        this.registerProcessor(new JavaScriptProcessor());
+        this.registerProcessor(new LearnProcessor());
+        this.registerProcessor(new LowercaseProcessor());
+        this.registerProcessor(new MapProcessor());
+        this.registerProcessor(new NormalizeProcessor());
+        this.registerProcessor(new Person2Processor());
+        this.registerProcessor(new PersonProcessor());
+        this.registerProcessor(new PredicateProcessor());
+        this.registerProcessor(new ProgramProcessor());
+        this.registerProcessor(new RandomProcessor());
+        this.registerProcessor(new RequestProcessor());
+        this.registerProcessor(new ResetLearnProcessor());
+        this.registerProcessor(new ResponseProcessor());
+        this.registerProcessor(new RestProcessor());
+        this.registerProcessor(new SelectProcessor());
+        this.registerProcessor(new SentenceProcessor());
+        this.registerProcessor(new SizeProcessor());
+        this.registerProcessor(new SraiProcessor());
+        this.registerProcessor(new SraixProcessor());
+        this.registerProcessor(new SrProcessor());
+        this.registerProcessor(new StarProcessor());
+        this.registerProcessor(new SystemProcessor());
+        this.registerProcessor(new TemplateProcessor());
+        this.registerProcessor(new TextProcessor());
+        this.registerProcessor(new ThatProcessor());
+        this.registerProcessor(new ThatStarProcessor());
+        this.registerProcessor(new ThinkProcessor());
+        this.registerProcessor(new TopicStarProcessor());
+        this.registerProcessor(new TripleProcessor());
+        this.registerProcessor(new UniqProcessor());
+        this.registerProcessor(new UppercaseProcessor());
+        this.registerProcessor(new VocabularyProcessor());
+        final List<AIMLTagProcessor> extensions = bot.getConfiguration().getTagProcessors();
         if (extensions != null) {
             extensions.forEach(this::registerProcessor);
         }
@@ -108,10 +155,10 @@ public class AIMLProcessor {
      * @param topic      value of topic in case this category is wrapped in a <topic> tag
      * @param aimlFile   name of AIML file being parsed.
      */
-    private void categoryProcessor(Node n, ArrayList<Category> categories, String topic, String aimlFile, String language) {
+    private void categoryProcessor(final Node n, final ArrayList<Category> categories, String topic, final String aimlFile, final String language) {
         String pattern, that, template;
 
-        NodeList children = n.getChildNodes();
+        final NodeList children = n.getChildNodes();
         pattern = "*";
         that = "*";
         template = "";
@@ -119,8 +166,8 @@ public class AIMLProcessor {
             if (log.isDebugEnabled()) {
                 log.debug("CHILD: {}", children.item(j).getNodeName());
             }
-            Node m = children.item(j);
-            String mName = m.getNodeName();
+            final Node m = children.item(j);
+            final String mName = m.getNodeName();
 
             switch (mName) {
                 case "#text":
@@ -153,12 +200,12 @@ public class AIMLProcessor {
         topic = cleanPattern(topic);
 
         template = trimTag(template, "template");
-        if (bot.getConfiguration().isJpTokenize()) {
+        if (this.bot.getConfiguration().isJpTokenize()) {
             pattern = JapaneseUtils.tokenizeSentence(pattern);
             that = JapaneseUtils.tokenizeSentence(that);
             topic = JapaneseUtils.tokenizeSentence(topic);
         }
-        Category c = new Category(bot, 0, pattern, that, topic, template, aimlFile);
+        final Category c = new Category(this.bot, 0, pattern, that, topic, template, aimlFile);
         if (StringUtils.isEmpty(template)) {
             log.info("Category {} discarded due to blank or missing <template>.", c.inputThatTopic());
         } else {
@@ -172,9 +219,9 @@ public class AIMLProcessor {
         return pattern.trim();
     }
 
-    public static String trimTag(String s, String tagName) {
-        String stag = "<" + tagName + ">";
-        String etag = "</" + tagName + ">";
+    public static String trimTag(String s, final String tagName) {
+        final String stag = "<" + tagName + ">";
+        final String etag = "</" + tagName + ">";
         if (s.startsWith(stag) && s.endsWith(etag)) {
             s = s.substring(stag.length());
             s = s.substring(0, s.length() - etag.length());
@@ -189,46 +236,46 @@ public class AIMLProcessor {
      * @param aimlFile  AIML file name.
      * @return list of categories.
      */
-    public ArrayList<Category> AIMLToCategories(String directory, String aimlFile) {
+    public ArrayList<Category> AIMLToCategories(final String directory, final String aimlFile) {
         try {
-            ArrayList<Category> categories = new ArrayList<>();
-            Node root = DomUtils.parseFile(directory + "/" + aimlFile);      // <aiml> tag
-            String language = bot.getConfiguration().getDefaultLanguage();
+            final ArrayList<Category> categories = new ArrayList<>();
+            final Node root = DomUtils.parseFile(directory + "/" + aimlFile);      // <aiml> tag
+            String language = this.bot.getConfiguration().getDefaultLanguage();
             if (root.hasAttributes()) {
-                NamedNodeMap XMLAttributes = root.getAttributes();
+                final NamedNodeMap XMLAttributes = root.getAttributes();
                 for (int i = 0; i < XMLAttributes.getLength(); i++) {
                     if ("language".equals(XMLAttributes.item(i).getNodeName())) {
                         language = XMLAttributes.item(i).getNodeValue();
                     }
                 }
             }
-            NodeList nodelist = root.getChildNodes();
+            final NodeList nodelist = root.getChildNodes();
             for (int i = 0; i < nodelist.getLength(); i++) {
-                Node n = nodelist.item(i);
+                final Node n = nodelist.item(i);
                 if (log.isTraceEnabled()) {
                     log.trace("AIML child: {}", n.getNodeName());
                 }
                 if ("category".equals(n.getNodeName())) {
-                    categoryProcessor(n, categories, "*", aimlFile, language);
+                    this.categoryProcessor(n, categories, "*", aimlFile, language);
                 } else if ("topic".equals(n.getNodeName())) {
-                    String topic = n.getAttributes().getNamedItem("name").getTextContent();
+                    final String topic = n.getAttributes().getNamedItem("name").getTextContent();
                     if (log.isTraceEnabled()) {
                         log.trace("topic: {}", topic);
                     }
-                    NodeList children = n.getChildNodes();
+                    final NodeList children = n.getChildNodes();
                     for (int j = 0; j < children.getLength(); j++) {
-                        Node m = children.item(j);
+                        final Node m = children.item(j);
                         if (log.isTraceEnabled()) {
                             log.trace("Topic child: {}", m.getNodeName());
                         }
                         if ("category".equals(m.getNodeName())) {
-                            categoryProcessor(m, categories, topic, aimlFile, language);
+                            this.categoryProcessor(m, categories, topic, aimlFile, language);
                         }
                     }
                 }
             }
             return categories;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("AIMLToCategories Error:", e);
             return null;
         }
@@ -244,8 +291,8 @@ public class AIMLProcessor {
      * @param chatSession current client session.
      * @return bot's response.
      */
-    public String respond(Request request, String input, String that, String topic, Chat chatSession) {
-        return respond(request, input, that, topic, chatSession, 0);
+    public String respond(final Request request, final String input, final String that, final String topic, final Chat chatSession) {
+        return this.respond(request, input, that, topic, chatSession, 0);
     }
 
     /**
@@ -258,7 +305,7 @@ public class AIMLProcessor {
      * @param srCnt       number of <srai> activations.
      * @return bot's reply.
      */
-    public String respond(Request request, String input, String that, String topic, Chat chatSession, int srCnt) {
+    public String respond(final Request request, String input, final String that, final String topic, final Chat chatSession, final int srCnt) {
         if (log.isTraceEnabled()) {
             log.trace("input: {}, that: {}, topic: {}, chatSession: {}, srCnt: {}", input, that, topic, chatSession, srCnt);
         }
@@ -268,17 +315,17 @@ public class AIMLProcessor {
         }
         response = chatSession.getBot().getConfiguration().getLanguage().getDefaultResponse();
         try {
-            Nodemapper leaf = chatSession.getBot().getBrain().match(input, that, topic);
+            final Nodemapper leaf = chatSession.getBot().getBrain().match(input, that, topic);
             if (leaf == null) {
                 return response;
             }
-            ParseState ps = new ParseState(request,this, 0, chatSession, input, that, topic, leaf, srCnt);
-            String template = leaf.getCategory().getTemplate();
-            response = evalTemplate(template, ps);
+            final ParseState ps = new ParseState(request,this, 0, chatSession, input, that, topic, leaf, srCnt);
+            final String template = leaf.getCategory().getTemplate();
+            response = this.evalTemplate(template, ps);
             if (log.isTraceEnabled()) {
                 log.trace("in AIMLProcessor.respond(), template={}, trat={}", template, that);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
         return response;
@@ -295,27 +342,27 @@ public class AIMLProcessor {
      * @param ignoreAttributes tag names to ignore when evaluating the tag.
      * @return the result of evaluating the tag contents.
      */
-    public String evalTagContent(Node node, ParseState ps, Set<String> ignoreAttributes) {
+    public String evalTagContent(final Node node, final ParseState ps, final Set<String> ignoreAttributes) {
         if (log.isTraceEnabled()) {
             log.trace("AIMLProcessor.evalTagContent(node: {}, ps: {}, ignoreAttributes: {}", node, ps, ignoreAttributes);
             log.trace("in AIMLProcessor.evalTagContent, node string: {}", DomUtils.nodeToString(node));
         }
-        StringBuilder result = new StringBuilder();
+        final StringBuilder result = new StringBuilder();
         try {
-            NodeList childList = node.getChildNodes();
+            final NodeList childList = node.getChildNodes();
             for (int i = 0; i < childList.getLength(); i++) {
-                Node child = childList.item(i);
+                final Node child = childList.item(i);
                 if (log.isTraceEnabled()) {
                     log.trace("in AIMLProcessor.evalTagContent(), child: {}", child);
                 }
                 if (ignoreAttributes == null || !ignoreAttributes.contains(child.getNodeName())) {
-                    result.append(recursEval(child, ps));
+                    result.append(this.recursEval(child, ps));
                 }
                 if (log.isTraceEnabled()) {
                     log.trace("in AIMLProcessor.evalTagContent(), result: ", result);
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Something went wrong with evalTagContent", e);
         }
 
@@ -332,12 +379,12 @@ public class AIMLProcessor {
      * @param ps   current parse state
      * @return unevaluated generic XML string
      */
-    public String genericXML(Node node, ParseState ps) {
+    public String genericXML(final Node node, final ParseState ps) {
         if (log.isTraceEnabled()) {
             log.trace("AIMLProcessor.genericXML(node: {}, ps: {}", node, ps);
         }
-        String evalResult = evalTagContent(node, ps, null);
-        String result = unevaluatedXML(evalResult, node, ps);
+        final String evalResult = this.evalTagContent(node, ps, null);
+        final String result = unevaluatedXML(evalResult, node, ps);
         if (log.isTraceEnabled()) {
             log.trace("in AIMLProcessor.genericXML(), returning: {}", result);
         }
@@ -356,14 +403,14 @@ public class AIMLProcessor {
      * @param ps   current parse state.
      * @return the unevaluated XML string
      */
-    public static String unevaluatedXML(String resultIn, Node node, ParseState ps) {
-        String nodeName = node.getNodeName();
+    public static String unevaluatedXML(final String resultIn, final Node node, final ParseState ps) {
+        final String nodeName = node.getNodeName();
         if (log.isTraceEnabled()) {
             log.trace("AIMLProcessor.unevaluatedXML(resultIn: {}, node: {}, nodeName: {}, ps: {}", resultIn, node, nodeName, ps);
         }
-        StringBuilder attributes = new StringBuilder();
+        final StringBuilder attributes = new StringBuilder();
         if (node.hasAttributes()) {
-            NamedNodeMap XMLAttributes = node.getAttributes();
+            final NamedNodeMap XMLAttributes = node.getAttributes();
             for (int i = 0; i < XMLAttributes.getLength(); i++) {
                 attributes
                         .append(" ")
@@ -389,18 +436,18 @@ public class AIMLProcessor {
      * @param node current XML parse node
      * @param ps   AIML parse state
      */
-    public String recursEval(Node node, ParseState ps) {
+    public String recursEval(final Node node, final ParseState ps) {
         if (log.isTraceEnabled()) {
             log.trace("AIMLProcessor.recursEval(node: {}, ps: {})", node, ps);
         }
         try {
-            String nodeName = node.getNodeName();
-            AIMLTagProcessor processor = nodeProcessors.get(nodeName);
+            final String nodeName = node.getNodeName();
+            final AIMLTagProcessor processor = this.nodeProcessors.get(nodeName);
             if (processor != null && processor.getTags().contains(nodeName)) {
                 return processor.eval(node, ps);
             }
-            return genericXML(node, ps);
-        } catch (Exception e) {
+            return this.genericXML(node, ps);
+        } catch (final Exception e) {
             log.error("Error: ", e);
             return "";
         }
@@ -413,15 +460,15 @@ public class AIMLProcessor {
      * @param ps       AIML Parse state
      * @return result of evaluating template.
      */
-    public String evalTemplate(String template, ParseState ps) {
+    public String evalTemplate(String template, final ParseState ps) {
         try {
             template = "<template>" + template + "</template>";
-            Node root = DomUtils.parseString(template);
-            return recursEval(root, ps);
-        } catch (Exception e) {
+            final Node root = DomUtils.parseString(template);
+            return this.recursEval(root, ps);
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
-        return bot.getConfiguration().getLanguage().getTemplateFailed();
+        return this.bot.getConfiguration().getLanguage().getTemplateFailed();
     }
 
     /**
@@ -438,16 +485,16 @@ public class AIMLProcessor {
             template = "<template>" + template + "</template>";
             DomUtils.parseString(template);
             return true;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Invalid Template {}", template, e);
         }
         return false;
     }
 
-    public void registerProcessor(AIMLTagProcessor processor) {
-        for (String tag : processor.getTags()) {
-            if (nodeProcessors.containsKey(tag)) {
-                log.warn("Tag <{}> handler {} has been replaced by {}", tag, nodeProcessors.get(tag), processor);
+    public void registerProcessor(final AIMLTagProcessor processor) {
+        for (final String tag : processor.getTags()) {
+            if (this.nodeProcessors.containsKey(tag)) {
+                log.warn("Tag <{}> handler {} has been replaced by {}", tag, this.nodeProcessors.get(tag), processor);
             }
             this.nodeProcessors.put(tag, processor);
         }

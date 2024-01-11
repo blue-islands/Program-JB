@@ -31,8 +31,8 @@ public class LowercaseProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        String result = evalTagContent(node, ps, null);
+    public String eval(final Node node, final ParseState ps) {
+        final String result = this.evalTagContent(node, ps, null);
         return result.toLowerCase();
     }
 }

@@ -37,12 +37,12 @@ public class JavaScriptProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
+    public String eval(final Node node, final ParseState ps) {
         String result = Constants.bad_javascript;
-        String script = evalTagContent(node, ps, null);
+        final String script = this.evalTagContent(node, ps, null);
         try {
             result = IOUtils.evalScript("JavaScript", script);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("JavaScript error:", e);
         }
         if (log.isTraceEnabled()) {

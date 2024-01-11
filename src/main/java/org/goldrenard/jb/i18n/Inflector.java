@@ -51,8 +51,8 @@ public class Inflector {
         protected final Pattern expressionPattern;
         protected final String replacement;
 
-        protected Rule(String expression,
-                       String replacement) {
+        protected Rule(final String expression,
+                       final String replacement) {
             this.expression = expression;
             this.replacement = replacement != null ? replacement : "";
             this.expressionPattern = Pattern.compile(this.expression, Pattern.CASE_INSENSITIVE);
@@ -65,35 +65,41 @@ public class Inflector {
          * @param input the input string
          * @return the modified string if this rule applied, or null if the input was not modified by this rule
          */
-        protected String apply(String input) {
-            Matcher matcher = this.expressionPattern.matcher(input);
-            if (!matcher.find()) return null;
+        protected String apply(final String input) {
+            final Matcher matcher = this.expressionPattern.matcher(input);
+            if (!matcher.find()) {
+                return null;
+            }
             return matcher.replaceAll(this.replacement);
         }
 
         @Override
         public int hashCode() {
-            return expression.hashCode();
+            return this.expression.hashCode();
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
+        public boolean equals(final Object obj) {
+            if (obj == this) {
+                return true;
+            }
             if (obj != null && obj.getClass() == this.getClass()) {
                 final Rule that = (Rule) obj;
-                if (this.expression.equalsIgnoreCase(that.expression)) return true;
+                if (this.expression.equalsIgnoreCase(that.expression)) {
+                    return true;
+                }
             }
             return false;
         }
 
         @Override
         public String toString() {
-            return expression + ", " + replacement;
+            return this.expression + ", " + this.replacement;
         }
     }
 
-    private LinkedList<Rule> plurals = new LinkedList<>();
-    private LinkedList<Rule> singulars = new LinkedList<>();
+    private final LinkedList<Rule> plurals = new LinkedList<>();
+    private final LinkedList<Rule> singulars = new LinkedList<>();
     /**
      * The lowercase words that are to be excluded and not processed. This map can be modified by the users via
      * {@link #getUncountables()}.
@@ -101,10 +107,10 @@ public class Inflector {
     private final Set<String> uncountables = new HashSet<>();
 
     public Inflector() {
-        initialize();
+        this.initialize();
     }
 
-    protected Inflector(Inflector original) {
+    protected Inflector(final Inflector original) {
         this.plurals.addAll(original.plurals);
         this.singulars.addAll(original.singulars);
         this.uncountables.addAll(original.uncountables);
@@ -141,25 +147,32 @@ public class Inflector {
      * @return the pluralized form of the word, or the word itself if it could not be pluralized
      * @see #singularize(Object)
      */
-    public String pluralize(Object word) {
-        if (word == null) return null;
-        String wordStr = word.toString().trim();
-        if (wordStr.length() == 0) return wordStr;
-        if (isUncountable(wordStr)) return wordStr;
-        for (Rule rule : this.plurals) {
-            String result = rule.apply(wordStr);
-            if (result != null) return result;
+    public String pluralize(final Object word) {
+        if (word == null) {
+            return null;
+        }
+        final String wordStr = word.toString().trim();
+        if ((wordStr.length() == 0) || this.isUncountable(wordStr)) {
+            return wordStr;
+        }
+        for (final Rule rule : this.plurals) {
+            final String result = rule.apply(wordStr);
+            if (result != null) {
+                return result;
+            }
         }
         return wordStr;
     }
 
-    public String pluralize(Object word,
-                            int count) {
-        if (word == null) return null;
+    public String pluralize(final Object word,
+                            final int count) {
+        if (word == null) {
+            return null;
+        }
         if (count == 1 || count == -1) {
             return word.toString();
         }
-        return pluralize(word);
+        return this.pluralize(word);
     }
 
     /**
@@ -184,14 +197,19 @@ public class Inflector {
      * @return the pluralized form of the word, or the word itself if it could not be pluralized
      * @see #pluralize(Object)
      */
-    public String singularize(Object word) {
-        if (word == null) return null;
-        String wordStr = word.toString().trim();
-        if (wordStr.length() == 0) return wordStr;
-        if (isUncountable(wordStr)) return wordStr;
-        for (Rule rule : this.singulars) {
-            String result = rule.apply(wordStr);
-            if (result != null) return result;
+    public String singularize(final Object word) {
+        if (word == null) {
+            return null;
+        }
+        final String wordStr = word.toString().trim();
+        if ((wordStr.length() == 0) || this.isUncountable(wordStr)) {
+            return wordStr;
+        }
+        for (final Rule rule : this.singulars) {
+            final String result = rule.apply(wordStr);
+            if (result != null) {
+                return result;
+            }
         }
         return wordStr;
     }
@@ -215,9 +233,9 @@ public class Inflector {
      * @see #camelCase(String, boolean, char[])
      * @see #upperCamelCase(String, char[])
      */
-    public String lowerCamelCase(String lowerCaseAndUnderscoredWord,
-                                 char... delimiterChars) {
-        return camelCase(lowerCaseAndUnderscoredWord, false, delimiterChars);
+    public String lowerCamelCase(final String lowerCaseAndUnderscoredWord,
+                                 final char... delimiterChars) {
+        return this.camelCase(lowerCaseAndUnderscoredWord, false, delimiterChars);
     }
 
     /**
@@ -239,9 +257,9 @@ public class Inflector {
      * @see #camelCase(String, boolean, char[])
      * @see #lowerCamelCase(String, char[])
      */
-    public String upperCamelCase(String lowerCaseAndUnderscoredWord,
-                                 char... delimiterChars) {
-        return camelCase(lowerCaseAndUnderscoredWord, true, delimiterChars);
+    public String upperCamelCase(final String lowerCaseAndUnderscoredWord,
+                                 final char... delimiterChars) {
+        return this.camelCase(lowerCaseAndUnderscoredWord, true, delimiterChars);
     }
 
     /**
@@ -270,16 +288,20 @@ public class Inflector {
      * @see #lowerCamelCase(String, char[])
      */
     public String camelCase(String lowerCaseAndUnderscoredWord,
-                            boolean uppercaseFirstLetter,
-                            char... delimiterChars) {
-        if (lowerCaseAndUnderscoredWord == null) return null;
+                            final boolean uppercaseFirstLetter,
+                            final char... delimiterChars) {
+        if (lowerCaseAndUnderscoredWord == null) {
+            return null;
+        }
         lowerCaseAndUnderscoredWord = lowerCaseAndUnderscoredWord.trim();
-        if (lowerCaseAndUnderscoredWord.length() == 0) return "";
+        if (lowerCaseAndUnderscoredWord.length() == 0) {
+            return "";
+        }
         if (uppercaseFirstLetter) {
             String result = lowerCaseAndUnderscoredWord;
             // Replace any extra delimiters with underscores (before the underscores are converted in the next step)...
             if (delimiterChars != null) {
-                for (char delimiterChar : delimiterChars) {
+                for (final char delimiterChar : delimiterChars) {
                     result = result.replace(delimiterChar, '_');
                 }
             }
@@ -287,9 +309,11 @@ public class Inflector {
             // Change the case at the beginning at after each underscore ...
             return replaceAllWithUppercase(result, "(^|_)(.)", 2);
         }
-        if (lowerCaseAndUnderscoredWord.length() < 2) return lowerCaseAndUnderscoredWord;
+        if (lowerCaseAndUnderscoredWord.length() < 2) {
+            return lowerCaseAndUnderscoredWord;
+        }
         return "" + Character.toLowerCase(lowerCaseAndUnderscoredWord.charAt(0))
-                + camelCase(lowerCaseAndUnderscoredWord, true, delimiterChars).substring(1);
+                + this.camelCase(lowerCaseAndUnderscoredWord, true, delimiterChars).substring(1);
     }
 
     /**
@@ -311,16 +335,20 @@ public class Inflector {
      * @param delimiterChars optional characters that are used to delimit word boundaries (beyond capitalization)
      * @return a lower-cased version of the input, with separate words delimited by the underscore character.
      */
-    public String underscore(String camelCaseWord,
-                             char... delimiterChars) {
-        if (camelCaseWord == null) return null;
+    public String underscore(final String camelCaseWord,
+                             final char... delimiterChars) {
+        if (camelCaseWord == null) {
+            return null;
+        }
         String result = camelCaseWord.trim();
-        if (result.length() == 0) return "";
+        if (result.length() == 0) {
+            return "";
+        }
         result = result.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2");
         result = result.replaceAll("([a-z\\d])([A-Z])", "$1_$2");
         result = result.replace('-', '_');
         if (delimiterChars != null) {
-            for (char delimiterChar : delimiterChars) {
+            for (final char delimiterChar : delimiterChars) {
                 result = result.replace(delimiterChar, '_');
             }
         }
@@ -333,11 +361,17 @@ public class Inflector {
      * @param words the word to be capitalized
      * @return the string with the first character capitalized and the remaining characters lowercased
      */
-    public String capitalize(String words) {
-        if (words == null) return null;
-        String result = words.trim();
-        if (result.length() == 0) return "";
-        if (result.length() == 1) return result.toUpperCase();
+    public String capitalize(final String words) {
+        if (words == null) {
+            return null;
+        }
+        final String result = words.trim();
+        if (result.length() == 0) {
+            return "";
+        }
+        if (result.length() == 1) {
+            return result.toUpperCase();
+        }
         return "" + Character.toUpperCase(result.charAt(0)) + result.substring(1).toLowerCase();
     }
 
@@ -357,21 +391,25 @@ public class Inflector {
      * @return the humanized string
      * @see #titleCase(String, String[])
      */
-    public String humanize(String lowerCaseAndUnderscoredWords,
-                           String... removableTokens) {
-        if (lowerCaseAndUnderscoredWords == null) return null;
+    public String humanize(final String lowerCaseAndUnderscoredWords,
+                           final String... removableTokens) {
+        if (lowerCaseAndUnderscoredWords == null) {
+            return null;
+        }
         String result = lowerCaseAndUnderscoredWords.trim();
-        if (result.length() == 0) return "";
+        if (result.length() == 0) {
+            return "";
+        }
         // Remove a trailing "_id" token
         result = result.replaceAll("_id$", "");
         // Remove all of the tokens that should be removed
         if (removableTokens != null) {
-            for (String removableToken : removableTokens) {
+            for (final String removableToken : removableTokens) {
                 result = result.replaceAll(removableToken, "");
             }
         }
         result = result.replaceAll("_+", " "); // replace all adjacent underscores with a single space
-        return capitalize(result);
+        return this.capitalize(result);
     }
 
     /**
@@ -390,9 +428,9 @@ public class Inflector {
      * @param removableTokens optional array of tokens that are to be removed
      * @return the title-case version of the supplied words
      */
-    public String titleCase(String words,
-                            String... removableTokens) {
-        String result = humanize(words, removableTokens);
+    public String titleCase(final String words,
+                            final String... removableTokens) {
+        String result = this.humanize(words, removableTokens);
         result = replaceAllWithUppercase(result, "\\b([a-z])", 1); // change first char of each word to uppercase
         return result;
     }
@@ -404,14 +442,22 @@ public class Inflector {
      * @param number the non-negative number
      * @return the string with the number and ordinal suffix
      */
-    public String ordinalize(int number) {
+    public String ordinalize(final int number) {
         int remainder = number % 100;
-        String numberStr = Integer.toString(number);
-        if (11 <= number && number <= 13) return numberStr + "th";
+        final String numberStr = Integer.toString(number);
+        if (11 <= number && number <= 13) {
+            return numberStr + "th";
+        }
         remainder = number % 10;
-        if (remainder == 1) return numberStr + "st";
-        if (remainder == 2) return numberStr + "nd";
-        if (remainder == 3) return numberStr + "rd";
+        if (remainder == 1) {
+            return numberStr + "st";
+        }
+        if (remainder == 2) {
+            return numberStr + "nd";
+        }
+        if (remainder == 3) {
+            return numberStr + "rd";
+        }
         return numberStr + "th";
     }
 
@@ -426,9 +472,11 @@ public class Inflector {
      * @param word the word
      * @return true if the plural and singular forms of the word are the same
      */
-    public boolean isUncountable(String word) {
-        if (word == null) return false;
-        String trimmedLower = word.trim().toLowerCase();
+    public boolean isUncountable(final String word) {
+        if (word == null) {
+            return false;
+        }
+        final String trimmedLower = word.trim().toLowerCase();
         return this.uncountables.contains(trimmedLower);
     }
 
@@ -438,35 +486,39 @@ public class Inflector {
      * @return the set of uncountable words
      */
     public Set<String> getUncountables() {
-        return uncountables;
+        return this.uncountables;
     }
 
-    public void addPluralize(String rule,
-                             String replacement) {
+    public void addPluralize(final String rule,
+                             final String replacement) {
         final Rule pluralizeRule = new Rule(rule, replacement);
         this.plurals.addFirst(pluralizeRule);
     }
 
-    public void addSingularize(String rule,
-                               String replacement) {
+    public void addSingularize(final String rule,
+                               final String replacement) {
         final Rule singularizeRule = new Rule(rule, replacement);
         this.singulars.addFirst(singularizeRule);
     }
 
-    public void addIrregular(String singular,
-                             String plural) {
+    public void addIrregular(final String singular,
+                             final String plural) {
         //CheckArg.isNotEmpty(singular, "singular rule");
         //CheckArg.isNotEmpty(plural, "plural rule");
-        String singularRemainder = singular.length() > 1 ? singular.substring(1) : "";
-        String pluralRemainder = plural.length() > 1 ? plural.substring(1) : "";
-        addPluralize("(" + singular.charAt(0) + ")" + singularRemainder + "$", "$1" + pluralRemainder);
-        addSingularize("(" + plural.charAt(0) + ")" + pluralRemainder + "$", "$1" + singularRemainder);
+        final String singularRemainder = singular.length() > 1 ? singular.substring(1) : "";
+        final String pluralRemainder = plural.length() > 1 ? plural.substring(1) : "";
+        this.addPluralize("(" + singular.charAt(0) + ")" + singularRemainder + "$", "$1" + pluralRemainder);
+        this.addSingularize("(" + plural.charAt(0) + ")" + pluralRemainder + "$", "$1" + singularRemainder);
     }
 
-    public void addUncountable(String... words) {
-        if (words == null || words.length == 0) return;
-        for (String word : words) {
-            if (word != null) uncountables.add(word.trim().toLowerCase());
+    public void addUncountable(final String... words) {
+        if (words == null || words.length == 0) {
+            return;
+        }
+        for (final String word : words) {
+            if (word != null) {
+                this.uncountables.add(word.trim().toLowerCase());
+            }
         }
     }
 
@@ -484,12 +536,12 @@ public class Inflector {
      * @param groupNumberToUppercase
      * @return the input string with the appropriate characters converted to upper-case
      */
-    protected static String replaceAllWithUppercase(String input,
-                                                    String regex,
-                                                    int groupNumberToUppercase) {
-        Pattern underscoreAndDotPattern = Pattern.compile(regex);
-        Matcher matcher = underscoreAndDotPattern.matcher(input);
-        StringBuffer sb = new StringBuffer();
+    protected static String replaceAllWithUppercase(final String input,
+                                                    final String regex,
+                                                    final int groupNumberToUppercase) {
+        final Pattern underscoreAndDotPattern = Pattern.compile(regex);
+        final Matcher matcher = underscoreAndDotPattern.matcher(input);
+        final StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             matcher.appendReplacement(sb, matcher.group(groupNumberToUppercase).toUpperCase());
         }
@@ -507,7 +559,7 @@ public class Inflector {
     }
 
     protected void initialize() {
-        Inflector inflect = this;
+        final Inflector inflect = this;
         inflect.addPluralize("$", "s");
         inflect.addPluralize("s$", "s");
         inflect.addPluralize("(ax|test)is$", "$1es");

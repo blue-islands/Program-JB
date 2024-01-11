@@ -31,8 +31,8 @@ public class SizeProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        int size = ps.getChatSession().getBot().getBrain().getCategories().size();
+    public String eval(final Node node, final ParseState ps) {
+        final int size = ps.getChatSession().getBot().getBrain().getCategories().size();
         return String.valueOf(size);
     }
 }

@@ -16,8 +16,12 @@
  */
 package org.goldrenard.jb.core;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.model.History;
 import org.goldrenard.jb.model.Predicates;
@@ -27,7 +31,8 @@ import org.goldrenard.jb.utils.JapaneseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Class encapsulating a chat session between a bot and a client
@@ -53,11 +58,11 @@ public class Chat {
      *
      * @param bot the bot to chat with
      */
-    public Chat(Bot bot) {
+    public Chat(final Bot bot) {
         this(bot, true, "0");
     }
 
-    public Chat(Bot bot, boolean doWrites) {
+    public Chat(final Bot bot, final boolean doWrites) {
         this(bot, doWrites, "0");
     }
 
@@ -67,17 +72,17 @@ public class Chat {
      * @param bot        bot to chat with
      * @param customerId unique customer identifier
      */
-    public Chat(Bot bot, boolean doWrites, String customerId) {
+    public Chat(final Bot bot, final boolean doWrites, final String customerId) {
         this.customerId = customerId;
         this.bot = bot;
         this.tripleStore = new TripleStore("anon", bot);
         this.doWrites = doWrites;
-        int maxHistory = bot.getConfiguration().getMaxHistory();
+        final int maxHistory = bot.getConfiguration().getMaxHistory();
         this.thatHistory = new History<>(maxHistory, "that");
         this.requestHistory = new History<>(maxHistory, "request");
         this.responseHistory = new History<>(maxHistory, "response");
         this.inputHistory = new History<>(maxHistory, "input");
-        History<String> contextThatHistory = new History<>(maxHistory);
+        final History<String> contextThatHistory = new History<>(maxHistory);
         contextThatHistory.add(Constants.default_that);
         this.thatHistory.add(contextThatHistory);
         this.predicates = new Predicates(bot);
@@ -86,8 +91,8 @@ public class Chat {
         if (log.isTraceEnabled()) {
             log.trace("Chat Session Created for bot {}", bot.getName());
         }
-        addPredicates();
-        addTriples();
+        this.addPredicates();
+        this.addTriples();
     }
 
     /**
@@ -95,8 +100,8 @@ public class Chat {
      */
     private void addPredicates() {
         try {
-            predicates.getPredicateDefaults(bot.getConfigPath() + "/predicates.txt");
-        } catch (Exception e) {
+            this.predicates.getPredicateDefaults(this.bot.getConfigPath() + "/predicates.txt");
+        } catch (final Exception e) {
             log.warn("Error reading predicates", e);
         }
     }
@@ -106,28 +111,28 @@ public class Chat {
      */
     private int addTriples() {
         int count = 0;
-        String fileName = bot.getConfigPath() + "/triples.txt";
+        final String fileName = this.bot.getConfigPath() + "/triples.txt";
         if (log.isTraceEnabled()) {
             log.trace("Loading Triples from {}", fileName);
         }
-        File f = new File(fileName);
+        final File f = new File(fileName);
         if (f.exists()) {
             try (InputStream is = new FileInputStream(f)) {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
                     String strLine;
                     //Read File Line By Line
                     while ((strLine = br.readLine()) != null) {
-                        String[] triple = strLine.split(":");
+                        final String[] triple = strLine.split(":");
                         if (triple.length >= 3) {
-                            String subject = triple[0];
-                            String predicate = triple[1];
-                            String object = triple[2];
-                            tripleStore.addTriple(subject, predicate, object);
+                            final String subject = triple[0];
+                            final String predicate = triple[1];
+                            final String object = triple[2];
+                            this.tripleStore.addTriple(subject, predicate, object);
                             count++;
                         }
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.warn("Error reading triples", e);
             }
         }
@@ -143,14 +148,14 @@ public class Chat {
     private void chat() {
         try {
             String request = "SET PREDICATES"; // TODO why it is executed here?
-            String response = multisentenceRespond(request);
+            String response = this.multisentenceRespond(request);
             while (!"quit".equals(request)) {
                 log.info("Human: ");
                 request = IOUtils.readInputTextLine();
-                response = multisentenceRespond(request);
+                response = this.multisentenceRespond(request);
                 log.info("Robot: {}", response);
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.warn("Error: ", e);
         }
     }
@@ -164,29 +169,29 @@ public class Chat {
      * @param contextThatHistory history of "that" values for this request/response interaction
      * @return bot's reply
      */
-    private String respond(Request request, String input, String that, String topic, History<String> contextThatHistory) {
+    private String respond(final Request request, String input, final String that, final String topic, final History<String> contextThatHistory) {
         boolean repetition = true;
-        for (int i = 0; i < bot.getConfiguration().getRepetitionCount(); i++) {
-            if (inputHistory.get(i) == null || !input.toUpperCase().equals(inputHistory.get(i).toUpperCase())) {
+        for (int i = 0; i < this.bot.getConfiguration().getRepetitionCount(); i++) {
+            if (this.inputHistory.get(i) == null || !input.toUpperCase().equals(this.inputHistory.get(i).toUpperCase())) {
                 repetition = false;
             }
         }
         if (input.equals(Constants.null_input)) {
             repetition = false;
         }
-        inputHistory.add(input);
+        this.inputHistory.add(input);
         if (repetition) {
             input = Constants.repetition_detected;
         }
 
         String response;
 
-        response = bot.getProcessor().respond(request, input, that, topic, this);
-        String normResponse = bot.getPreProcessor().normalize(response);
-        if (bot.getConfiguration().isJpTokenize()) {
+        response = this.bot.getProcessor().respond(request, input, that, topic, this);
+        String normResponse = this.bot.getPreProcessor().normalize(response);
+        if (this.bot.getConfiguration().isJpTokenize()) {
             normResponse = JapaneseUtils.tokenizeSentence(normResponse);
         }
-        String sentences[] = bot.getPreProcessor().sentenceSplit(normResponse);
+        final String sentences[] = this.bot.getPreProcessor().sentenceSplit(normResponse);
         for (String s : sentences) {
             if (s.trim().equals("")) {
                 s = Constants.default_that;
@@ -203,14 +208,14 @@ public class Chat {
      * @param contextThatHistory history of "that" values for this request/response interaction
      * @return bot's reply
      */
-    private String respond(Request request, String input, History<String> contextThatHistory) {
-        History hist = thatHistory.get(0);
-        String that = hist != null ? hist.getString(0) : Constants.default_that;
-        return respond(request, input, that, predicates.get("topic"), contextThatHistory);
+    private String respond(final Request request, final String input, final History<String> contextThatHistory) {
+        final History hist = this.thatHistory.get(0);
+        final String that = hist != null ? hist.getString(0) : Constants.default_that;
+        return this.respond(request, input, that, this.predicates.get("topic"), contextThatHistory);
     }
 
-    public String multisentenceRespond(String request) {
-        return multisentenceRespond(Request.builder().input(request).build());
+    public String multisentenceRespond(final String request) {
+        return this.multisentenceRespond(Request.builder().input(request).build());
     }
 
     /**
@@ -219,32 +224,32 @@ public class Chat {
      * @param request client's multiple-sentence input
      * @return Response
      */
-    public String multisentenceRespond(Request request) {
-        StringBuilder response = new StringBuilder();
+    public String multisentenceRespond(final Request request) {
+        final StringBuilder response = new StringBuilder();
         try {
-            String normalized = bot.getPreProcessor().normalize(request.getInput());
-            if (bot.getConfiguration().isJpTokenize()) {
+            String normalized = this.bot.getPreProcessor().normalize(request.getInput());
+            if (this.bot.getConfiguration().isJpTokenize()) {
                 normalized = JapaneseUtils.tokenizeSentence(normalized);
             }
-            String sentences[] = bot.getPreProcessor().sentenceSplit(normalized);
-            History<String> contextThatHistory = new History<>(bot.getConfiguration().getMaxHistory(), "contextThat");
-            for (String sentence : sentences) {
-                String reply = respond(request, sentence, contextThatHistory);
+            final String sentences[] = this.bot.getPreProcessor().sentenceSplit(normalized);
+            final History<String> contextThatHistory = new History<>(this.bot.getConfiguration().getMaxHistory(), "contextThat");
+            for (final String sentence : sentences) {
+                final String reply = this.respond(request, sentence, contextThatHistory);
                 response.append(" ").append(reply.trim());
             }
 
             String result = response.toString();
-            requestHistory.add(request.getInput());
-            responseHistory.add(result);
-            thatHistory.add(contextThatHistory);
+            this.requestHistory.add(request.getInput());
+            this.responseHistory.add(result);
+            this.thatHistory.add(contextThatHistory);
             result = result.replaceAll("[\n]+", "\n").trim();
-            if (doWrites) {
-                bot.writeLearnfIFCategories();
+            if (this.doWrites) {
+                this.bot.writeLearnfIFCategories();
             }
             return result;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
-        return bot.getConfiguration().getLanguage().getErrorResponse();
+        return this.bot.getConfiguration().getLanguage().getErrorResponse();
     }
 }

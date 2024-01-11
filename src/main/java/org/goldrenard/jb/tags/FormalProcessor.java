@@ -31,8 +31,8 @@ public class FormalProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        String result = evalTagContent(node, ps, null);
+    public String eval(final Node node, final ParseState ps) {
+        final String result = this.evalTagContent(node, ps, null);
         return capitalizeString(result);
     }
 
@@ -43,8 +43,8 @@ public class FormalProcessor extends BaseTagProcessor {
      * @param string the string to capitalize
      * @return the capitalized string
      */
-    private static String capitalizeString(String string) {
-        char[] chars = string.toLowerCase().toCharArray();
+    private static String capitalizeString(final String string) {
+        final char[] chars = string.toLowerCase().toCharArray();
         boolean found = false;
         for (int i = 0; i < chars.length; i++) {
             if (!found && Character.isLetter(chars[i])) {

@@ -16,25 +16,34 @@
  */
 package org.goldrenard.jb.model;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.core.Bot;
 import org.goldrenard.jb.utils.JapaneseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.util.HashMap;
-
 /**
  * Manage client predicates
  */
 public class Predicates extends HashMap<String, String> {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+
     private static final Logger log = LoggerFactory.getLogger(Predicates.class);
 
     private final Bot bot;
 
-    public Predicates(Bot bot) {
+    public Predicates(final Bot bot) {
         this.bot = bot;
     }
 
@@ -45,8 +54,9 @@ public class Predicates extends HashMap<String, String> {
      * @param value predicate value
      * @return predicate value
      */
-    public String put(String key, String value) {
-        if (bot.getConfiguration().isJpTokenize()) {
+    @Override
+    public String put(final String key, String value) {
+        if (this.bot.getConfiguration().isJpTokenize()) {
             if (key.equals("topic")) {
                 value = JapaneseUtils.tokenizeSentence(value);
             }
@@ -54,7 +64,7 @@ public class Predicates extends HashMap<String, String> {
         if (key.equals("topic") && value.length() == 0) {
             value = Constants.default_get;
         }
-        if (value.equals(bot.getConfiguration().getLanguage().getTooMuchRecursion())) {
+        if (value.equals(this.bot.getConfiguration().getLanguage().getTooMuchRecursion())) {
             value = Constants.default_list_item;
         }
         return super.put(key, value);
@@ -66,8 +76,8 @@ public class Predicates extends HashMap<String, String> {
      * @param key predicate name
      * @return predicate value
      */
-    public String get(String key) {
-        String result = super.get(key);
+    public String get(final String key) {
+        final String result = super.get(key);
         return result != null ? result : Constants.default_get;
     }
 
@@ -76,18 +86,18 @@ public class Predicates extends HashMap<String, String> {
      *
      * @param in input stream
      */
-    private void getPredicateDefaultsFromInputStream(InputStream in) {
+    private void getPredicateDefaultsFromInputStream(final InputStream in) {
         String strLine;
         try (BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
             //Read File Line By Line
             while ((strLine = br.readLine()) != null) {
                 if (strLine.contains(":")) {
-                    String property = strLine.substring(0, strLine.indexOf(":"));
-                    String value = strLine.substring(strLine.indexOf(":") + 1);
-                    put(property, value);
+                    final String property = strLine.substring(0, strLine.indexOf(":"));
+                    final String value = strLine.substring(strLine.indexOf(":") + 1);
+                    this.put(property, value);
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
     }
@@ -97,17 +107,17 @@ public class Predicates extends HashMap<String, String> {
      *
      * @param filename name of file
      */
-    public void getPredicateDefaults(String filename) {
+    public void getPredicateDefaults(final String filename) {
         try {
             // Open the file that is the first
             // command line parameter
-            File file = new File(filename);
+            final File file = new File(filename);
             if (file.exists()) {
                 try (FileInputStream stream = new FileInputStream(filename)) {
-                    getPredicateDefaultsFromInputStream(stream);
+                    this.getPredicateDefaultsFromInputStream(stream);
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
     }

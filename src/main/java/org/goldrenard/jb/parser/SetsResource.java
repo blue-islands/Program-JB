@@ -16,6 +16,11 @@
  */
 package org.goldrenard.jb.parser;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.FileUtils;
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.core.Bot;
@@ -24,12 +29,12 @@ import org.goldrenard.jb.parser.base.NamedResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class SetsResource extends NamedResource<AIMLSet> {
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
     private static final String SETS_EXTENSION = "txt";
 
@@ -37,21 +42,21 @@ public class SetsResource extends NamedResource<AIMLSet> {
 
     private final Bot bot;
 
-    public SetsResource(Bot bot) {
+    public SetsResource(final Bot bot) {
         super(SETS_EXTENSION);
         this.bot = bot;
-        put(Constants.natural_number_set_name, new AIMLSet(Constants.natural_number_set_name, bot));
+        this.put(Constants.natural_number_set_name, new AIMLSet(Constants.natural_number_set_name, bot));
     }
 
     @Override
-    protected AIMLSet load(String resourceName, File file) {
-        AIMLSet aimlSet = new AIMLSet(resourceName, bot);
+    protected AIMLSet load(final String resourceName, final File file) {
+        final AIMLSet aimlSet = new AIMLSet(resourceName, this.bot);
         try {
             for (String line : FileUtils.readLines(file, "UTF-8")) {
                 // strLine = bot.getPreProcessor().normalize(strLine).toUpperCase();
                 // assume the set is pre-normalized for faster loading
                 if (line.startsWith(Constants.remote_set_key)) {
-                    String[] splitLine = line.split(":");
+                    final String[] splitLine = line.split(":");
                     if (splitLine.length >= 4) {
                         aimlSet.setHost(splitLine[1]);
                         aimlSet.setBotId(splitLine[2]);
@@ -61,34 +66,34 @@ public class SetsResource extends NamedResource<AIMLSet> {
                     }
                 } else {
                     line = line.toUpperCase().trim();
-                    String[] splitLine = line.split(" ");
-                    int length = splitLine.length;
+                    final String[] splitLine = line.split(" ");
+                    final int length = splitLine.length;
                     if (length > aimlSet.getMaxLength()) {
                         aimlSet.setMaxLength(length);
                     }
                     aimlSet.add(line.trim());
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Read AIML Set error", e);
         }
         return aimlSet;
     }
 
     @Override
-    public void write(AIMLSet resource) {
+    public void write(final AIMLSet resource) {
         log.info("Writing AIML Set {}", resource.getName());
 
-        List<String> lines = resource.isExternal()
+        final List<String> lines = resource.isExternal()
                 ? Collections.singletonList(String.format("external:%s:%s:%s",
                 resource.getHost(), resource.getBotId(), resource.getMaxLength()))
                 : resource.stream().map(String::trim).collect(Collectors.toList());
 
-        String fileName = bot.getSetsPath() + "/" + resource.getName() + "." + SETS_EXTENSION;
+        final String fileName = this.bot.getSetsPath() + "/" + resource.getName() + "." + SETS_EXTENSION;
 
         try {
             FileUtils.writeLines(new File(fileName), "UTF-8", lines);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
     }

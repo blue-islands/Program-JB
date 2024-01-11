@@ -16,10 +16,10 @@
  */
 package org.goldrenard.jb.tags.base;
 
+import java.util.Set;
+
 import org.goldrenard.jb.model.ParseState;
 import org.w3c.dom.Node;
-
-import java.util.Set;
 
 /**
  * An interface that handles node

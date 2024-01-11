@@ -16,10 +16,10 @@
  */
 package org.goldrenard.jb.model;
 
+import java.util.regex.Pattern;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.regex.Pattern;
 
 @Getter
 @Setter

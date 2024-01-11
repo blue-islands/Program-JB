@@ -22,14 +22,18 @@ import org.goldrenard.jb.utils.Utilities;
 
 public class PronounsResource extends CollectionResource<String> {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
     private final static String PRONOUNS_FILE = "pronouns.txt";
 
     @Override
-    public int read(String path) {
+    public int read(final String path) {
         Utilities
                 .readFileLines(path + "/" + PRONOUNS_FILE)
                 .stream()
                 .filter(StringUtils::isNotEmpty).forEach(this::add);
-        return size();
+        return this.size();
     }
 }

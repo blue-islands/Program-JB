@@ -16,13 +16,13 @@
  */
 package org.goldrenard.jb.core;
 
-import org.goldrenard.jb.model.Nodemapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.goldrenard.jb.model.Nodemapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NodemapperOperator {
 
@@ -34,8 +34,8 @@ public class NodemapperOperator {
      * @param node Nodemapper object
      * @return number of branches
      */
-    public static int size(Nodemapper node) {
-        Set<String> set = new HashSet<>();
+    public static int size(final Nodemapper node) {
+        final Set<String> set = new HashSet<>();
         if (node.isShortCut()) {
             set.add("<THAT>");
         }
@@ -55,7 +55,7 @@ public class NodemapperOperator {
      * @param key   key word
      * @param value word maps to this next node
      */
-    public static void put(Nodemapper node, String key, Nodemapper value) {
+    public static void put(final Nodemapper node, final String key, final Nodemapper value) {
         if (node.getMap() != null) {
             node.getMap().put(key, value);
         } else { // node.type == unary_node_mapper
@@ -71,7 +71,7 @@ public class NodemapperOperator {
      * @param key  key word to map
      * @return the mapped node or null if the key is not found
      */
-    public static Nodemapper get(Nodemapper node, String key) {
+    public static Nodemapper get(final Nodemapper node, final String key) {
         if (node.getMap() != null) {
             return node.getMap().get(key);
         } else {// node.type == unary_node_mapper
@@ -89,7 +89,7 @@ public class NodemapperOperator {
      * @param key  key to test
      * @return true or false
      */
-    public static boolean containsKey(Nodemapper node, String key) {
+    public static boolean containsKey(final Nodemapper node, final String key) {
         if (node.getMap() != null) {
             return node.getMap().containsKey(key);
         } else {// node.type == unary_node_mapper
@@ -102,7 +102,7 @@ public class NodemapperOperator {
      *
      * @param node Nodemapper object
      */
-    public static void printKeys(Nodemapper node) {
+    public static void printKeys(final Nodemapper node) {
         keySet(node).forEach(e -> log.info("{}", e));
     }
 
@@ -112,11 +112,11 @@ public class NodemapperOperator {
      * @param node Nodemapper object
      * @return set of keys
      */
-    public static Set<String> keySet(Nodemapper node) {
+    public static Set<String> keySet(final Nodemapper node) {
         if (node.getMap() != null) {
             return node.getMap().keySet();
         } else {// node.type == unary_node_mapper
-            Set<String> set = new HashSet<>();
+            final Set<String> set = new HashSet<>();
             if (node.getKey() != null) {
                 set.add(node.getKey());
             }
@@ -130,7 +130,7 @@ public class NodemapperOperator {
      * @param node Nodemapper object
      * @return true or false
      */
-    public static boolean isLeaf(Nodemapper node) {
+    public static boolean isLeaf(final Nodemapper node) {
         return (node.getCategory() != null);
     }
 
@@ -139,7 +139,7 @@ public class NodemapperOperator {
      *
      * @param node Nodemapper object
      */
-    public static void upgrade(Nodemapper node) {
+    public static void upgrade(final Nodemapper node) {
         node.setMap(new HashMap<>());
         node.getMap().put(node.getKey(), node.getValue());
         node.setKey(null);

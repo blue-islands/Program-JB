@@ -33,8 +33,8 @@ public class TestAB {
 
     public static String sample_file = "sample.random.txt";
 
-    public static void testChat(Bot bot, boolean doWrites) {
-        Chat chatSession = new Chat(bot, doWrites);
+    public static void testChat(final Bot bot, final boolean doWrites) {
+        final Chat chatSession = new Chat(bot, doWrites);
         bot.getBrain().nodeStats();
         String textLine = "";
         while (true) {
@@ -71,13 +71,13 @@ public class TestAB {
         }
     }
 
-    public static void runTests(Bot bot) {
+    public static void runTests(final Bot bot) {
         bot.getConfiguration().setQaTestMode(true);
-        Chat chatSession = new Chat(bot, false);
+        final Chat chatSession = new Chat(bot, false);
         //        bot.preProcessor.normalizeFile("c:/ab/bots/super/aiml/thats.txt", "c:/ab/bots/super/aiml/normalthats.txt");
         bot.getBrain().nodeStats();
-        IOUtils testInput = new IOUtils(bot.getRootPath() + "/data/lognormal-500.txt", "read");
-        IOUtils testOutput = new IOUtils(bot.getRootPath() + "/data/lognormal-500-out.txt", "write");
+        final IOUtils testInput = new IOUtils(bot.getRootPath() + "/data/lognormal-500.txt", "read");
+        final IOUtils testOutput = new IOUtils(bot.getRootPath() + "/data/lognormal-500-out.txt", "write");
         String textLine = testInput.readLine();
         while (textLine != null) {
             if (textLine.length() < 1) {
@@ -114,8 +114,8 @@ public class TestAB {
         testOutput.close();
     }
 
-    public static void testAB(Bot bot, String sampleFile) {
-        AB ab = new AB(bot, sampleFile);
+    public static void testAB(final Bot bot, final String sampleFile) {
+        final AB ab = new AB(bot, sampleFile);
         ab.ab();
         log.info("Begin Pattern Suggestor Terminal Interaction");
         ab.terminalInteraction();

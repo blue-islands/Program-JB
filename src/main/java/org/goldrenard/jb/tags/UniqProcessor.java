@@ -16,16 +16,16 @@
  */
 package org.goldrenard.jb.tags;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.goldrenard.jb.model.Clause;
 import org.goldrenard.jb.model.ParseState;
 import org.goldrenard.jb.model.Tuple;
 import org.goldrenard.jb.tags.base.BaseTagProcessor;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class UniqProcessor extends BaseTagProcessor {
 
@@ -34,16 +34,16 @@ public class UniqProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        HashSet<String> vars = new HashSet<>();
-        HashSet<String> visibleVars = new HashSet<>();
+    public String eval(final Node node, final ParseState ps) {
+        final HashSet<String> vars = new HashSet<>();
+        final HashSet<String> visibleVars = new HashSet<>();
         String subj = "?subject";
         String pred = "?predicate";
         String obj = "?object";
-        NodeList childList = node.getChildNodes();
+        final NodeList childList = node.getChildNodes();
         for (int j = 0; j < childList.getLength(); j++) {
-            Node childNode = childList.item(j);
-            String contents = evalTagContent(childNode, ps, null);
+            final Node childNode = childList.item(j);
+            final String contents = this.evalTagContent(childNode, ps, null);
             if (childNode.getNodeName().equals("subj")) {
                 subj = contents;
             } else if (childNode.getNodeName().equals("pred")) {
@@ -56,18 +56,18 @@ public class UniqProcessor extends BaseTagProcessor {
                 vars.add(contents);
             }
         }
-        Tuple partial = ps.getChatSession().getTripleStore().storeTuple(new Tuple(vars, visibleVars));
-        Clause clause = new Clause(subj, pred, obj);
-        Set<Tuple> tuples = ps.getChatSession().getTripleStore().selectFromSingleClause(partial, clause, true);
+        final Tuple partial = ps.getChatSession().getTripleStore().storeTuple(new Tuple(vars, visibleVars));
+        final Clause clause = new Clause(subj, pred, obj);
+        final Set<Tuple> tuples = ps.getChatSession().getTripleStore().selectFromSingleClause(partial, clause, true);
         String tupleList = tuples.stream().map(Tuple::getName).collect(Collectors.joining(" "));
         if (tupleList.length() == 0) {
             tupleList = "NIL";
         }
         String var = "";
-        for (String x : visibleVars) {
+        for (final String x : visibleVars) {
             var = x;
         }
-        String firstTuple = firstWord(tupleList);
+        final String firstTuple = firstWord(tupleList);
         return ps.getChatSession().getTripleStore().tupleGet(firstTuple, var);
     }
 }

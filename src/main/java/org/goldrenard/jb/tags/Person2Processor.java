@@ -31,10 +31,10 @@ public class Person2Processor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
+    public String eval(final Node node, final ParseState ps) {
         String result;
         if (node.hasChildNodes()) {
-            result = evalTagContent(node, ps, null);
+            result = this.evalTagContent(node, ps, null);
         } else {
             result = ps.getStarBindings().getInputStars().star(0);   // for <person2/>
         }

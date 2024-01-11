@@ -16,12 +16,19 @@
  */
 package org.goldrenard.jb.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import java.io.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IOUtils {
 
@@ -30,17 +37,17 @@ public class IOUtils {
     private BufferedReader reader;
     private BufferedWriter writer;
 
-    public IOUtils(String filePath, String mode) {
+    public IOUtils(final String filePath, final String mode) {
         try {
             if (mode.equals("read")) {
-                reader = new BufferedReader(new FileReader(filePath));
+                this.reader = new BufferedReader(new FileReader(filePath));
             } else if (mode.equals("write")) {
                 if (!new File(filePath).delete()) {
                     log.warn("Could not delete {}", filePath);
                 }
-                writer = new BufferedWriter(new FileWriter(filePath, true));
+                this.writer = new BufferedWriter(new FileWriter(filePath, true));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.warn("IOUtils[path={}, mode={}] init error", filePath, mode, e);
         }
     }
@@ -48,36 +55,36 @@ public class IOUtils {
     public String readLine() {
         String result = null;
         try {
-            result = reader.readLine();
-        } catch (IOException e) {
+            result = this.reader.readLine();
+        } catch (final IOException e) {
             log.warn("readLine  error", e);
         }
         return result;
     }
 
-    public void writeLine(String line) {
+    public void writeLine(final String line) {
         try {
-            writer.write(line);
-            writer.newLine();
-        } catch (IOException e) {
+            this.writer.write(line);
+            this.writer.newLine();
+        } catch (final IOException e) {
             log.warn("writeLine  error", e);
         }
     }
 
     public void close() {
         try {
-            if (reader != null) {
-                reader.close();
+            if (this.reader != null) {
+                this.reader.close();
             }
-            if (writer != null) {
-                writer.close();
+            if (this.writer != null) {
+                this.writer.close();
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.warn("close  error", e);
         }
     }
 
-    public static void writeOutputTextLine(String prompt, String text) {
+    public static void writeOutputTextLine(final String prompt, final String text) {
         log.info("{}: {}", prompt, text);
     }
 
@@ -85,34 +92,34 @@ public class IOUtils {
         return readInputTextLine(null);
     }
 
-    public static String readInputTextLine(String prompt) {
+    public static String readInputTextLine(final String prompt) {
         if (prompt != null) {
             log.info("{}: ", prompt);
         }
-        BufferedReader lineOfText = new BufferedReader(new InputStreamReader(System.in));
+        final BufferedReader lineOfText = new BufferedReader(new InputStreamReader(System.in));
         String textLine = null;
         try {
             textLine = lineOfText.readLine();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error("Error: ", e);
         }
         return textLine;
     }
 
-    public static File[] listFiles(File dir) {
+    public static File[] listFiles(final File dir) {
         return dir.listFiles();
     }
 
-    public static String system(String evaluatedContents, String failedString) {
-        Runtime runtime = Runtime.getRuntime();
+    public static String system(final String evaluatedContents, final String failedString) {
+        final Runtime runtime = Runtime.getRuntime();
         if (log.isDebugEnabled()) {
             log.debug("System = {}", evaluatedContents);
         }
         try {
-            Process process = runtime.exec(evaluatedContents);
+            final Process process = runtime.exec(evaluatedContents);
             try (InputStreamReader reader = new InputStreamReader(process.getInputStream())) {
-                BufferedReader buffer = new BufferedReader(reader);
-                StringBuilder result = new StringBuilder();
+                final BufferedReader buffer = new BufferedReader(reader);
+                final StringBuilder result = new StringBuilder();
                 String data = "";
                 while ((data = buffer.readLine()) != null) {
                     result.append(data).append("\n");
@@ -122,18 +129,18 @@ public class IOUtils {
                 }
                 return result.toString();
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("system command execution failed", e);
             return failedString;
         }
     }
 
-    public static String evalScript(String engineName, String script) throws Exception {
+    public static String evalScript(final String engineName, final String script) throws Exception {
         if (log.isDebugEnabled()) {
             log.info("Evaluating script = {}", script);
         }
-        ScriptEngineManager mgr = new ScriptEngineManager();
-        ScriptEngine engine = mgr.getEngineByName(engineName);
+        final ScriptEngineManager mgr = new ScriptEngineManager();
+        final ScriptEngine engine = mgr.getEngineByName(engineName);
         return "" + engine.eval(script);
     }
 }

@@ -31,8 +31,8 @@ public class GenderProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        String result = evalTagContent(node, ps, null);
+    public String eval(final Node node, final ParseState ps) {
+        String result = this.evalTagContent(node, ps, null);
         result = " " + result + " ";
         result = ps.getChatSession().getBot().getPreProcessor().gender(result);
         return result.trim();

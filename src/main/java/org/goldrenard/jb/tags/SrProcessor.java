@@ -27,7 +27,7 @@ public class SrProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
+    public String eval(final Node node, final ParseState ps) {
         return ps.getProcessor().respond(
                 ps.getRequest(),
                 ps.getStarBindings().getInputStars().star(0),

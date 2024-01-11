@@ -16,8 +16,9 @@
  */
 package org.goldrenard.jb.model;
 
-import lombok.Getter;
 import org.goldrenard.jb.configuration.Constants;
+
+import lombok.Getter;
 
 /**
  * History object to maintain history of input, that request and response
@@ -32,7 +33,7 @@ public class History<T> {
     /**
      * Constructor with default history name
      */
-    public History(int maxHistory) {
+    public History(final int maxHistory) {
         this(maxHistory, "unknown");
     }
 
@@ -41,7 +42,7 @@ public class History<T> {
      *
      * @param name name of history
      */
-    public History(int maxHistory, String name) {
+    public History(final int maxHistory, final String name) {
         this.name = name;
         this.history = new Object[maxHistory];
     }
@@ -51,11 +52,11 @@ public class History<T> {
      *
      * @param item history item to add
      */
-    public void add(T item) {
-        for (int i = history.length - 1; i > 0; i--) {
-            history[i] = history[i - 1];
+    public void add(final T item) {
+        for (int i = this.history.length - 1; i > 0; i--) {
+            this.history[i] = this.history[i - 1];
         }
-        history[0] = item;
+        this.history[0] = item;
     }
 
     /**
@@ -65,9 +66,9 @@ public class History<T> {
      * @return history item
      */
     @SuppressWarnings("unchecked")
-    public T get(int index) {
-        if (index < history.length) {
-            return (T) history[index];
+    public T get(final int index) {
+        if (index < this.history.length) {
+            return (T) this.history[index];
         }
         return null;
     }
@@ -78,12 +79,12 @@ public class History<T> {
      * @param index history index
      * @return history item
      */
-    public String getString(int index) {
-        if (index < history.length) {
-            if (history[index] == null) {
+    public String getString(final int index) {
+        if (index < this.history.length) {
+            if (this.history[index] == null) {
                 return Constants.unknown_history_item;
             }
-            return (String) history[index];
+            return (String) this.history[index];
         }
         return null;
     }

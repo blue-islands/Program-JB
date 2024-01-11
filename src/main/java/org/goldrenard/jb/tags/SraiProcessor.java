@@ -37,30 +37,30 @@ public class SraiProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        Bot bot = ps.getChatSession().getBot();
+    public String eval(final Node node, final ParseState ps) {
+        final Bot bot = ps.getChatSession().getBot();
         if (log.isTraceEnabled()) {
             log.trace("AIMLProcessor.srai(node: {}, ps: {}", node, ps);
         }
-        int sraiCount = ps.getSraiCount() + 1;
+        final int sraiCount = ps.getSraiCount() + 1;
         if (sraiCount > bot.getConfiguration().getMaxRecursionCount()
                 || ps.getDepth() > bot.getConfiguration().getMaxRecursionDepth()) {
             return bot.getConfiguration().getLanguage().getTooMuchRecursion();
         }
         String response = bot.getConfiguration().getLanguage().getDefaultResponse();
         try {
-            String result = evalTagContent(node, ps, null);
+            String result = this.evalTagContent(node, ps, null);
             result = result.trim();
             result = result.replaceAll("(\r\n|\n\r|\r|\n)", " ");
             result = ps.getChatSession().getBot().getPreProcessor().normalize(result);
             if (bot.getConfiguration().isJpTokenize()) {
                 result = JapaneseUtils.tokenizeSentence(result);
             }
-            String topic = ps.getChatSession().getPredicates().get("topic");     // the that stays the same, but the topic may have changed
+            final String topic = ps.getChatSession().getPredicates().get("topic");     // the that stays the same, but the topic may have changed
             if (log.isTraceEnabled()) {
                 log.trace("<srai>{}</srai> from {} topic={}", result, ps.getLeaf().getCategory().inputThatTopic(), topic);
             }
-            Nodemapper leaf = ps.getChatSession().getBot().getBrain().match(result, ps.getThat(), topic);
+            final Nodemapper leaf = ps.getChatSession().getBot().getBrain().match(result, ps.getThat(), topic);
             if (leaf == null) {
                 return response;
             }
@@ -77,10 +77,10 @@ public class SraiProcessor extends BaseTagProcessor {
                     topic,
                     leaf,
                     sraiCount));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
-        String result = response.trim();
+        final String result = response.trim();
         if (log.isTraceEnabled()) {
             log.trace("in SraiProcessor.srai(), returning: {}", result);
         }

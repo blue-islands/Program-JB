@@ -16,15 +16,16 @@
  */
 package org.goldrenard.jb.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import java.util.HashMap;
+
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.core.Bot;
 import org.goldrenard.jb.core.Sraix;
 import org.goldrenard.jb.i18n.Inflector;
 
-import java.util.HashMap;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * implements AIML Map
@@ -36,6 +37,11 @@ import java.util.HashMap;
 @Setter
 @ToString
 public class AIMLMap extends HashMap<String, String> implements NamedEntity {
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
     private final Bot bot;
 
@@ -50,7 +56,7 @@ public class AIMLMap extends HashMap<String, String> implements NamedEntity {
      *
      * @param name the name of the map
      */
-    public AIMLMap(String name, Bot bot) {
+    public AIMLMap(final String name, final Bot bot) {
         this.bot = bot;
         this.name = name;
     }
@@ -61,30 +67,30 @@ public class AIMLMap extends HashMap<String, String> implements NamedEntity {
      * @param key the domain element
      * @return the range element or a string indicating the key was not found
      */
-    public String get(String key) {
+    public String get(final String key) {
         String value;
-        if (name.equals(Constants.map_successor)) {
+        if (this.name.equals(Constants.map_successor)) {
             try {
-                int number = Integer.parseInt(key);
+                final int number = Integer.parseInt(key);
                 return String.valueOf(number + 1);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return Constants.default_map;
             }
-        } else if (name.equals(Constants.map_predecessor)) {
+        } else if (this.name.equals(Constants.map_predecessor)) {
             try {
-                int number = Integer.parseInt(key);
+                final int number = Integer.parseInt(key);
                 return String.valueOf(number - 1);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return Constants.default_map;
             }
-        } else if (name.equals("singular")) {
+        } else if (this.name.equals("singular")) {
             return Inflector.getInstance().singularize(key).toLowerCase();
-        } else if (name.equals("plural")) {
+        } else if (this.name.equals("plural")) {
             return Inflector.getInstance().pluralize(key).toLowerCase();
-        } else if (external && bot.getConfiguration().isEnableExternalMaps()) {
+        } else if (this.external && this.bot.getConfiguration().isEnableExternalMaps()) {
             //String[] split = key.split(" ");
-            String query = name.toUpperCase() + " " + key;
-            String response = Sraix.sraix(null, null, bot, query, Constants.default_map, null, host, botId,
+            final String query = this.name.toUpperCase() + " " + key;
+            final String response = Sraix.sraix(null, null, this.bot, query, Constants.default_map, null, this.host, this.botId,
                     null, "0");
             value = response;
         } else {

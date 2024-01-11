@@ -16,10 +16,10 @@
  */
 package org.goldrenard.jb.parser.base;
 
+import java.util.Collection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
 
 public interface ParsedResource<T> {
 
@@ -27,15 +27,15 @@ public interface ParsedResource<T> {
 
     int read(String path);
 
-    default void write(T resource) {
+    default void write(final T resource) {
         // no default implementation
     }
 
-    default void write(Collection<T> resources) {
-        for (T resource : resources) {
+    default void write(final Collection<T> resources) {
+        for (final T resource : resources) {
             try {
-                write(resource);
-            } catch (Exception e) {
+                this.write(resource);
+            } catch (final Exception e) {
                 log.error("Could not write resource {}", resource);
             }
         }

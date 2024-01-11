@@ -16,16 +16,17 @@
  */
 package org.goldrenard.jb.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.core.Bot;
 import org.goldrenard.jb.core.Sraix;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Pattern;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * implements AIML Sets
@@ -34,6 +35,11 @@ import java.util.regex.Pattern;
 @Setter
 @ToString
 public class AIMLSet extends HashSet<String> implements NamedEntity {
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
     private static final Pattern DIGITS_PATTERN = Pattern.compile("[0-9]+");
 
@@ -54,37 +60,37 @@ public class AIMLSet extends HashSet<String> implements NamedEntity {
      *
      * @param name name of set
      */
-    public AIMLSet(String name, Bot bot) {
+    public AIMLSet(final String name, final Bot bot) {
         super();
         this.bot = bot;
         this.name = name.toLowerCase();
         if (name.equals(Constants.natural_number_set_name)) {
-            maxLength = 1;
+            this.maxLength = 1;
         }
     }
 
-    public boolean contains(String s) {
-        if (external && bot.getConfiguration().isEnableExternalSets()) {
-            if (inCache.contains(s)) {
+    public boolean contains(final String s) {
+        if (this.external && this.bot.getConfiguration().isEnableExternalSets()) {
+            if (this.inCache.contains(s)) {
                 return true;
             }
-            if (outCache.contains(s)) {
+            if (this.outCache.contains(s)) {
                 return false;
             }
-            String[] split = s.split(" ");
-            if (split.length > maxLength) {
+            final String[] split = s.split(" ");
+            if (split.length > this.maxLength) {
                 return false;
             }
-            String query = Constants.set_member_string + name.toUpperCase() + " " + s;
-            String response = Sraix.sraix(null, null, bot, query, "false", null, host, botId, null, "0");
+            final String query = Constants.set_member_string + this.name.toUpperCase() + " " + s;
+            final String response = Sraix.sraix(null, null, this.bot, query, "false", null, this.host, this.botId, null, "0");
             if ("true".equals(response)) {
-                inCache.add(s);
+                this.inCache.add(s);
                 return true;
             } else {
-                outCache.add(s);
+                this.outCache.add(s);
                 return false;
             }
-        } else if (name.equals(Constants.natural_number_set_name)) {
+        } else if (this.name.equals(Constants.natural_number_set_name)) {
             return DIGITS_PATTERN.matcher(s).matches();
         }
         return super.contains(s);

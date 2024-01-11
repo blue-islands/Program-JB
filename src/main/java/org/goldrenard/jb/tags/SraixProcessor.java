@@ -16,13 +16,13 @@
  */
 package org.goldrenard.jb.tags;
 
+import java.util.Set;
+
 import org.goldrenard.jb.core.Sraix;
 import org.goldrenard.jb.model.ParseState;
 import org.goldrenard.jb.tags.base.BaseTagProcessor;
 import org.goldrenard.jb.utils.Utilities;
 import org.w3c.dom.Node;
-
-import java.util.Set;
 
 /**
  * access external web service for response
@@ -36,14 +36,14 @@ public class SraixProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        Set<String> attributeNames = Utilities.stringSet("botid", "host");
-        String host = getAttributeOrTagValue(node, ps, "host");
-        String botid = getAttributeOrTagValue(node, ps, "botid");
-        String hint = getAttributeOrTagValue(node, ps, "hint");
-        String limit = getAttributeOrTagValue(node, ps, "limit");
-        String defaultResponse = getAttributeOrTagValue(node, ps, "default");
-        String evalResult = evalTagContent(node, ps, attributeNames);
+    public String eval(final Node node, final ParseState ps) {
+        final Set<String> attributeNames = Utilities.stringSet("botid", "host");
+        final String host = this.getAttributeOrTagValue(node, ps, "host");
+        final String botid = this.getAttributeOrTagValue(node, ps, "botid");
+        final String hint = this.getAttributeOrTagValue(node, ps, "hint");
+        final String limit = this.getAttributeOrTagValue(node, ps, "limit");
+        final String defaultResponse = this.getAttributeOrTagValue(node, ps, "default");
+        final String evalResult = this.evalTagContent(node, ps, attributeNames);
         return Sraix.sraix(
                 ps.getRequest(),
                 ps.getChatSession(),

@@ -20,4 +20,9 @@ import java.util.HashSet;
 
 public abstract class CollectionResource<T> extends HashSet<T> implements ParsedResource<T> {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+
 }

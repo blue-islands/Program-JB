@@ -16,20 +16,26 @@
  */
 package org.goldrenard.jb.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.goldrenard.jb.configuration.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.goldrenard.jb.configuration.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.Getter;
+import lombok.Setter;
+
 @Getter
 @Setter
 public class Tuple extends HashMap<String, String> {
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
     private static final Logger log = LoggerFactory.getLogger(Tuple.class);
 
@@ -37,79 +43,79 @@ public class Tuple extends HashMap<String, String> {
     private Set<String> visibleVars = new HashSet<>();
     private String name;
 
-    protected Tuple(Set<String> varSet, Set<String> visibleVars, Tuple tuple) {
+    protected Tuple(final Set<String> varSet, final Set<String> visibleVars, final Tuple tuple) {
         if (visibleVars != null) {
             this.visibleVars.addAll(visibleVars);
         }
         if (varSet == null && tuple != null) {
-            for (String key : tuple.keySet()) {
-                put(key, tuple.get(key));
+            for (final String key : tuple.keySet()) {
+                this.put(key, tuple.get(key));
             }
             this.visibleVars.addAll(tuple.visibleVars);
         }
         if (varSet != null) {
-            for (String key : varSet) {
-                put(key, Constants.unbound_variable);
+            for (final String key : varSet) {
+                this.put(key, Constants.unbound_variable);
             }
         }
         this.name = "tuple" + index.incrementAndGet();
     }
 
-    public Tuple(Tuple tuple) {
+    public Tuple(final Tuple tuple) {
         this(null, null, tuple);
     }
 
-    public Tuple(Set<String> varSet, Set<String> visibleVars) {
+    public Tuple(final Set<String> varSet, final Set<String> visibleVars) {
         this(varSet, visibleVars, null);
     }
 
     public Set<String> getVars() {
-        return keySet();
+        return this.keySet();
     }
 
-    public String getValue(String var) {
-        String result = get(var);
+    public String getValue(final String var) {
+        final String result = this.get(var);
         if (result == null) {
             return Constants.default_get;
         }
         return result;
     }
 
-    public void bind(String var, String value) {
-        if (get(var) != null && !get(var).equals(Constants.unbound_variable)) {
-            log.warn("{} already bound to {}", var, get(var));
+    public void bind(final String var, final String value) {
+        if (this.get(var) != null && !this.get(var).equals(Constants.unbound_variable)) {
+            log.warn("{} already bound to {}", var, this.get(var));
         } else {
-            put(var, value);
+            this.put(var, value);
         }
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == null || !Tuple.class.isAssignableFrom(o.getClass())) {
             return false;
         }
-        Tuple tuple = (Tuple) o;
-        if (visibleVars.size() != tuple.visibleVars.size()) {
+        final Tuple tuple = (Tuple) o;
+        if (this.visibleVars.size() != tuple.visibleVars.size()) {
             return false;
         }
-        for (String x : visibleVars) {
+        for (final String x : this.visibleVars) {
             if (!tuple.visibleVars.contains(x)) {
                 return false;
-            } else if (get(x) != null && !get(x).equals(tuple.get(x))) {
+            } else if (this.get(x) != null && !this.get(x).equals(tuple.get(x))) {
                 return false;
             }
         }
-        return !values().contains(Constants.unbound_variable)
+        return !this.values().contains(Constants.unbound_variable)
                 && !tuple.values().contains(Constants.unbound_variable);
     }
 
     @Override
     public int hashCode() {
         int result = 1;
-        for (String x : visibleVars) {
+        for (final String x : this.visibleVars) {
             result = 31 * result + x.hashCode();
-            if (get(x) != null) {
-                result = 31 * result + get(x).hashCode();
+            if (this.get(x) != null) {
+                result = 31 * result + this.get(x).hashCode();
             }
         }
         return result;

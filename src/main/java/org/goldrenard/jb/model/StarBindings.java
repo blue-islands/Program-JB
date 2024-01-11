@@ -33,8 +33,8 @@ public class StarBindings {
      * Constructor  -- this class has public members
      */
     public StarBindings() {
-        inputStars = new Stars();
-        thatStars = new Stars();
-        topicStars = new Stars();
+        this.inputStars = new Stars();
+        this.thatStars = new Stars();
+        this.topicStars = new Stars();
     }
 }

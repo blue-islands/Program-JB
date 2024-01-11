@@ -16,6 +16,11 @@
  */
 package org.goldrenard.jb.parser;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.FileUtils;
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.core.Bot;
@@ -24,12 +29,12 @@ import org.goldrenard.jb.parser.base.NamedResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class MapsResource extends NamedResource<AIMLMap> {
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
     private static final String MAPS_EXTENSION = "txt";
 
@@ -37,21 +42,21 @@ public class MapsResource extends NamedResource<AIMLMap> {
 
     private final Bot bot;
 
-    public MapsResource(Bot bot) {
+    public MapsResource(final Bot bot) {
         super(MAPS_EXTENSION);
         this.bot = bot;
-        put(Constants.map_successor, new AIMLMap(Constants.map_successor, bot));
-        put(Constants.map_predecessor, new AIMLMap(Constants.map_predecessor, bot));
-        put(Constants.map_singular, new AIMLMap(Constants.map_singular, bot));
-        put(Constants.map_plural, new AIMLMap(Constants.map_plural, bot));
+        this.put(Constants.map_successor, new AIMLMap(Constants.map_successor, bot));
+        this.put(Constants.map_predecessor, new AIMLMap(Constants.map_predecessor, bot));
+        this.put(Constants.map_singular, new AIMLMap(Constants.map_singular, bot));
+        this.put(Constants.map_plural, new AIMLMap(Constants.map_plural, bot));
     }
 
     @Override
-    protected AIMLMap load(String resourceName, File file) {
-        AIMLMap aimlMap = new AIMLMap(resourceName, bot);
+    protected AIMLMap load(final String resourceName, final File file) {
+        final AIMLMap aimlMap = new AIMLMap(resourceName, this.bot);
         try {
-            for (String line : FileUtils.readLines(file, "UTF-8")) {
-                String[] splitLine = line.split(":");
+            for (final String line : FileUtils.readLines(file, "UTF-8")) {
+                final String[] splitLine = line.split(":");
                 if (log.isDebugEnabled()) {
                     log.debug("AIMLMap line={}", line);
                 }
@@ -64,22 +69,22 @@ public class MapsResource extends NamedResource<AIMLMap> {
                             log.info("Created external map at [host={}, botId={}]", aimlMap.getHost(), aimlMap.getBotId());
                         }
                     } else {
-                        String key = splitLine[0].toUpperCase();
-                        String value = splitLine[1];
+                        final String key = splitLine[0].toUpperCase();
+                        final String value = splitLine[1];
                         // assume domain element is already normalized for speedier load
                         //key = bot.preProcessor.normalize(key).trim();
                         aimlMap.put(key, value);
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Read AIML Set error", e);
         }
         return aimlMap;
     }
 
     @Override
-    public void write(AIMLMap resource) {
+    public void write(final AIMLMap resource) {
         log.info("Writing AIML Map {}", resource.getName());
 
         List<String> lines;
@@ -92,11 +97,11 @@ public class MapsResource extends NamedResource<AIMLMap> {
             }).collect(Collectors.toList());
         }
 
-        String fileName = bot.getMapsPath() + "/" + resource.getName() + "." + MAPS_EXTENSION;
+        final String fileName = this.bot.getMapsPath() + "/" + resource.getName() + "." + MAPS_EXTENSION;
 
         try {
             FileUtils.writeLines(new File(fileName), "UTF-8", lines);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
         }
     }

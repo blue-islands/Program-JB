@@ -16,6 +16,8 @@
  */
 package org.goldrenard.jb.tags;
 
+import java.util.Set;
+
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.model.ParseState;
 import org.goldrenard.jb.tags.base.BaseTagProcessor;
@@ -23,8 +25,6 @@ import org.goldrenard.jb.utils.Utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
-
-import java.util.Set;
 
 public class PredicateProcessor extends BaseTagProcessor {
 
@@ -42,16 +42,16 @@ public class PredicateProcessor extends BaseTagProcessor {
      * @param ps   AIML parse state
      * @return the result of the <set> operation
      */
-    private String set(Node node, ParseState ps) {
+    private String set(final Node node, final ParseState ps) {
         if (log.isTraceEnabled()) {
             log.trace("PredicateProcessor.set(node: {}, ps: {})", node, ps);
         }
-        Set<String> attributeNames = Utilities.stringSet("name", "var");
-        String predicateName = getAttributeOrTagValue(node, ps, "name");
-        String varName = getAttributeOrTagValue(node, ps, "var");
-        String result = evalTagContent(node, ps, attributeNames).trim();
+        final Set<String> attributeNames = Utilities.stringSet("name", "var");
+        final String predicateName = this.getAttributeOrTagValue(node, ps, "name");
+        final String varName = this.getAttributeOrTagValue(node, ps, "var");
+        String result = this.evalTagContent(node, ps, attributeNames).trim();
         result = result.replaceAll("(\r\n|\n\r|\r|\n)", " ");
-        String value = result.trim();
+        final String value = result.trim();
         if (predicateName != null) {
             ps.getChatSession().getPredicates().put(predicateName, result);
             if (log.isTraceEnabled()) {
@@ -81,14 +81,14 @@ public class PredicateProcessor extends BaseTagProcessor {
      * @param ps   AIML parse state
      * @return the result of the <get> operation
      */
-    private String get(Node node, ParseState ps) {
+    private String get(final Node node, final ParseState ps) {
         if (log.isTraceEnabled()) {
             log.trace("PredicateProcessor.get(node: {}, ps: {})", node, ps);
         }
         String result = Constants.default_get;
-        String predicateName = getAttributeOrTagValue(node, ps, "name");
-        String varName = getAttributeOrTagValue(node, ps, "var");
-        String tupleName = getAttributeOrTagValue(node, ps, "tuple");
+        final String predicateName = this.getAttributeOrTagValue(node, ps, "name");
+        final String varName = this.getAttributeOrTagValue(node, ps, "var");
+        final String tupleName = this.getAttributeOrTagValue(node, ps, "tuple");
         if (predicateName != null) {
             result = ps.getChatSession().getPredicates().get(predicateName).trim();
         } else if (varName != null && tupleName != null) {
@@ -103,17 +103,17 @@ public class PredicateProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
+    public String eval(final Node node, final ParseState ps) {
         try {
             switch (node.getNodeName()) {
                 case "set":
-                    return set(node, ps);
+                    return this.set(node, ps);
                 case "get":
-                    return get(node, ps);
+                    return this.get(node, ps);
                 default:
                     throw new IllegalStateException("Unsupported tag");
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Error: ", e);
             return "";
         }

@@ -16,14 +16,14 @@
  */
 package org.goldrenard.jb.tags;
 
+import java.util.Set;
+
 import org.goldrenard.jb.core.Bot;
 import org.goldrenard.jb.model.ParseState;
 import org.goldrenard.jb.tags.base.BaseTagProcessor;
 import org.goldrenard.jb.utils.IOUtils;
 import org.goldrenard.jb.utils.Utilities;
 import org.w3c.dom.Node;
-
-import java.util.Set;
 
 /**
  * implements {@code <system>} tag.
@@ -41,13 +41,13 @@ public class SystemProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        Bot bot = ps.getChatSession().getBot();
+    public String eval(final Node node, final ParseState ps) {
+        final Bot bot = ps.getChatSession().getBot();
         if (!bot.getConfiguration().isEnableSystemTag()) {
             return "";
         }
-        Set<String> attributeNames = Utilities.stringSet("timeout");
-        String evaluatedContents = evalTagContent(node, ps, attributeNames);
+        final Set<String> attributeNames = Utilities.stringSet("timeout");
+        final String evaluatedContents = this.evalTagContent(node, ps, attributeNames);
         return IOUtils.system(evaluatedContents, bot.getConfiguration().getLanguage().getSystemFailed());
     }
 }

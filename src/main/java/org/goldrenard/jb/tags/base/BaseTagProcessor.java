@@ -16,8 +16,8 @@
  */
 package org.goldrenard.jb.tags.base;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import java.util.Set;
+
 import org.goldrenard.jb.configuration.Constants;
 import org.goldrenard.jb.core.AIMLProcessor;
 import org.goldrenard.jb.model.ParseState;
@@ -28,7 +28,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.Set;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public abstract class BaseTagProcessor implements AIMLTagProcessor {
@@ -40,7 +41,7 @@ public abstract class BaseTagProcessor implements AIMLTagProcessor {
     @Getter
     protected final Set<String> tags;
 
-    protected BaseTagProcessor(String... tags) {
+    protected BaseTagProcessor(final String... tags) {
         this.tags = Utilities.stringSet(tags);
     }
 
@@ -55,22 +56,22 @@ public abstract class BaseTagProcessor implements AIMLTagProcessor {
      * @return the attribute value.
      */
     // value can be specified by either attribute or tag
-    protected String getAttributeOrTagValue(Node node, ParseState ps, String attributeName) {
+    protected String getAttributeOrTagValue(final Node node, final ParseState ps, final String attributeName) {
         if (log.isTraceEnabled()) {
             log.trace("BaseTagProcessor.getAttributeOrTagValue (node: {}, attributeName: {})", node, attributeName);
         }
         String result;
-        Node m = node.getAttributes().getNamedItem(attributeName);
+        final Node m = node.getAttributes().getNamedItem(attributeName);
         if (m == null) {
-            NodeList childList = node.getChildNodes();
+            final NodeList childList = node.getChildNodes();
             result = null;         // no attribute or tag named attributeName
             for (int i = 0; i < childList.getLength(); i++) {
-                Node child = childList.item(i);
+                final Node child = childList.item(i);
                 if (log.isTraceEnabled()) {
                     log.trace("getAttributeOrTagValue child = {}", child.getNodeName());
                 }
                 if (child.getNodeName().equals(attributeName)) {
-                    result = evalTagContent(child, ps, null);
+                    result = this.evalTagContent(child, ps, null);
                     if (log.isTraceEnabled()) {
                         log.trace("getAttributeOrTagValue result from child = {}", result);
                     }
@@ -94,16 +95,16 @@ public abstract class BaseTagProcessor implements AIMLTagProcessor {
      * @param ignoreAttributes tag names to ignore when evaluating the tag.
      * @return the result of evaluating the tag contents.
      */
-    protected String evalTagContent(Node node, ParseState ps, Set<String> ignoreAttributes) {
+    protected String evalTagContent(final Node node, final ParseState ps, final Set<String> ignoreAttributes) {
         if (log.isTraceEnabled()) {
             log.trace("BaseTagProcessor.evalTagContent(node: {}, ps: {}, ignoreAttributes: {}", node, ps, ignoreAttributes);
             log.trace("in BaseTagProcessor.evalTagContent, node string: {}", DomUtils.nodeToString(node));
         }
-        StringBuilder result = new StringBuilder();
+        final StringBuilder result = new StringBuilder();
         try {
-            NodeList childList = node.getChildNodes();
+            final NodeList childList = node.getChildNodes();
             for (int i = 0; i < childList.getLength(); i++) {
-                Node child = childList.item(i);
+                final Node child = childList.item(i);
                 if (log.isTraceEnabled()) {
                     log.trace("in BaseTagProcessor.evalTagContent(), child: {}", child);
                 }
@@ -114,7 +115,7 @@ public abstract class BaseTagProcessor implements AIMLTagProcessor {
                     log.trace("in BaseTagProcessor.evalTagContent(), result: ", result);
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Something went wrong with evalTagContent", e);
         }
 
@@ -132,19 +133,19 @@ public abstract class BaseTagProcessor implements AIMLTagProcessor {
      * @param ps   AIML parse state
      * @return the the integer intex value
      */
-    protected int getIndexValue(Node node, ParseState ps) {
-        String value = getAttributeOrTagValue(node, ps, "index");
+    protected int getIndexValue(final Node node, final ParseState ps) {
+        final String value = this.getAttributeOrTagValue(node, ps, "index");
         if (value != null) {
             try {
                 return Integer.parseInt(value) - 1;
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.error("Error: ", e);
             }
         }
         return 0;
     }
 
-    protected static String firstWord(String sentence) {
+    protected static String firstWord(final String sentence) {
         String content = (sentence == null ? "" : sentence);
         content = content.trim();
         if (content.contains(" ")) {

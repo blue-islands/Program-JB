@@ -27,8 +27,8 @@ public class FirstProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        String content = evalTagContent(node, ps, null);
+    public String eval(final Node node, final ParseState ps) {
+        final String content = this.evalTagContent(node, ps, null);
         return firstWord(content);
     }
 }

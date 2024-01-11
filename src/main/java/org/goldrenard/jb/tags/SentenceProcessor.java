@@ -31,8 +31,8 @@ public class SentenceProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        String result = evalTagContent(node, ps, null);
+    public String eval(final Node node, final ParseState ps) {
+        final String result = this.evalTagContent(node, ps, null);
         if (result.length() > 1) {
             return result.substring(0, 1).toUpperCase() + result.substring(1, result.length());
         }

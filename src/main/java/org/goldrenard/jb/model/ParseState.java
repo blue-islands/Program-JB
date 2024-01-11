@@ -16,10 +16,11 @@
  */
 package org.goldrenard.jb.model;
 
-import lombok.Getter;
-import lombok.Setter;
 import org.goldrenard.jb.core.AIMLProcessor;
 import org.goldrenard.jb.core.Chat;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * ParseState is a helper class for AIMLProcessor
@@ -49,7 +50,7 @@ public class ParseState {
      * @param topic       current topic
      * @param leaf        node containing the category processed
      */
-    public ParseState(Request request, AIMLProcessor processor, int depth, Chat chatSession, String input, String that, String topic, Nodemapper leaf, int sraiCount) {
+    public ParseState(final Request request, final AIMLProcessor processor, final int depth, final Chat chatSession, final String input, final String that, final String topic, final Nodemapper leaf, final int sraiCount) {
         this.request = request;
         this.processor = processor;
         this.chatSession = chatSession;

@@ -33,8 +33,8 @@ public class ThinkProcessor extends BaseTagProcessor {
     }
 
     @Override
-    public String eval(Node node, ParseState ps) {
-        evalTagContent(node, ps, null);
+    public String eval(final Node node, final ParseState ps) {
+        this.evalTagContent(node, ps, null);
         return "";
     }
 }
