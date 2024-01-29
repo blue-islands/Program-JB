@@ -1,49 +1,55 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.goldrenard</groupId>
     <artifactId>jb</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.13</version>
+    <version>1.1.0-SNAPSHOT</version>
 
     <name>Program JB</name>
     <description>
-        This is a fork of Program AB — the reference implementation of the AIML 2.0 draft specification.
-        AIML is a widely adopted standard for creating chat bots and mobile virtual assistants like ALICE, Mitsuku,
+        This is a fork of Program AB — the reference implementation of the AIML
+        2.0 draft specification.
+        AIML is a widely adopted standard for creating chat bots and mobile
+        virtual assistants like ALICE, Mitsuku,
         English Tutor, The Professor, S.U.P.E.R. and many more.
 
-        Program AB was developed by Richard Wallace (contact info@alicebot.org) and first released in January, 2013.
-        Following in the tradition of naming AIML interpreters after letters of the alphabet (Program B, Program D,
-        Program N, Program O etc.), the name "AB" is intended to suggest a fresh start with AIML 2.0.
+        Program AB was developed by Richard Wallace (contact info@alicebot.org)
+        and first released in January, 2013.
+        Following in the tradition of naming AIML interpreters after letters of
+        the alphabet (Program B, Program D,
+        Program N, Program O etc.), the name "AB" is intended to suggest a fresh
+        start with AIML 2.0.
 
-        This project is called JB because it is originally developed for JuniperBot Discord Bot,
+        This project is called JB because it is originally developed for
+        JuniperBot Discord Bot,
         but keeps full abstraction so it can be used anywhere.
     </description>
-    <url>https://github.com/GoldRenard/Program-JB</url>
+    <url>https://github.com/blue-islands/Program-JB</url>
 
     <licenses>
         <license>
             <name>GNU General Public License, Version 3</name>
             <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
             <distribution>manual</distribution>
-            <comments>A free, copyleft license for software and other kinds of works</comments>
+            <comments>A free, copyleft license for software and other kinds of
+                works</comments>
         </license>
     </licenses>
 
     <scm>
-        <url>https://github.com/GoldRenard/Program-JB</url>
-        <connection>scm:git:git@github.com:GoldRenard/Program-JB.git</connection>
+        <url>https://github.com/blue-islands/Program-JB</url>
+        <connection>scm:git:git@github.com:blue-islands/Program-JB.git</connection>
     </scm>
 
-    <developers>
-        <developer>
-            <id>owner</id>
-            <name>Ilya Egorov / Renard Gold / Caramel</name>
-            <email>goldrenard@gmail.com</email>
-            <timezone>UTC+4</timezone>
-        </developer>
-    </developers>
+    <distributionManagement>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <slf4j.version>1.7.25</slf4j.version>
@@ -135,7 +141,8 @@
                 </property>
             </activation>
             <properties>
-                <sourceDirectory>${project.build.directory}/generated-sources/delombok</sourceDirectory>
+                <sourceDirectory>
+                    ${project.build.directory}/generated-sources/delombok</sourceDirectory>
             </properties>
             <build>
                 <plugins>
@@ -181,8 +188,24 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <!-- リリースバージョンの指定 -->
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <releaseProfiles>release</releaseProfiles>
+                    <goals>deploy</goals>
+                    <!-- SCMコメントの設定 -->
+                    <scmCommentPrefix>[Release]</scmCommentPrefix>
+                    <!-- スナップショットバージョンの自動インクリメント -->
+                    <preparationGoals>clean verify</preparationGoals>
                 </configuration>
             </plugin>
         </plugins>
