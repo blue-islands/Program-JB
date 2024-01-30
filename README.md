@@ -1,6 +1,3 @@
-[version]: https://api.bintray.com/packages/goldrenard/maven/Program-JB/images/download.svg
-[download]: https://bintray.com/goldrenard/maven/Program-JB/_latestVersion
-
 # Program JB
 This is a fork of **Program AB** — the reference implementation of the AIML 2.0 draft specification. AIML is a widely adopted standard for creating chat bots and mobile virtual assistants like ALICE, Mitsuku, English Tutor, The Professor, S.U.P.E.R. and many more.
 
@@ -10,7 +7,7 @@ This project is called **JB** because it is originally developed for **J**uniper
 
 ## Download
 Latest Version:
-[ ![version][] ][download]
+[![](https://jitpack.io/v/blue-islands/Program-JB.svg)](https://jitpack.io/#blue-islands/Program-JB)
 
 Be sure to replace the **VERSION** key below with the latest version shown above!
 
